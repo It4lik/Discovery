@@ -44,7 +44,8 @@ namespace discovery
         }
 
         private string decimalToBin(string stringNumberToConvert) {
-            string returnedString; // will contain a binary value
+            // convert a decimal int to a binary int (only strings)
+            string returnedString; 
             returnedString = Convert.ToString(Convert.ToInt32(stringNumberToConvert), 2);
             while (returnedString.Length < 8) {
                 returnedString = String.Concat('0', returnedString);
@@ -53,12 +54,13 @@ namespace discovery
         }
 
         private string decimalToBin(int stringNumberToConvert) {
-            // surcharge permettant de passer un int plutôt qu'une string      
+            // overload : pass an int instead of a string as an argument      
             string currentInt = stringNumberToConvert.ToString();
             return decimalToBin(currentInt);
         }
 
         private string binToDecimal(string stringNumberToConvert) {
+            // convert a binary int to a decimal int (only strings)
             return Convert.ToInt32(stringNumberToConvert, 2).ToString();
         }
 
@@ -91,11 +93,12 @@ namespace discovery
         }
 
         private void getFirstAndLastIP(string networkIP, int maskCIDR) {
+            // get first free address, last free address and the broadcast address
             string networkBinIP = decimalIPtoBinIP(networkIP);
             char[] tempFirstIPChar = networkBinIP.ToCharArray(0, 32);
             char[] tempLastIPChar = networkBinIP.ToCharArray(0, 32);
 
-            for (int i = maskCIDR; i < 31; i++) // 31 because we do'nt need to set the last bit : it will always be 1 for the first address (with, it's the subnet address)
+            for (int i = maskCIDR; i < 31; i++) // 31 because we don't need to set the last bit : it will always be 1 for the first address (with, it's the subnet address)
             {
                 tempFirstIPChar[i] = '0';
                 tempLastIPChar[i] = '1';
@@ -112,6 +115,7 @@ namespace discovery
         }
 
         private string[] IPtoStringArray(string iPtoConvert) {
+            // convert an IP address string to a string array using dots as separators
             return iPtoConvert.Split('.');
         }
 
