@@ -25,16 +25,6 @@ namespace discovery
                 getFirstAndLastIP(_networkIP, _maskCIDR);
 
             }
-            System.Console.WriteLine(_firstFreeIP);
-            System.Console.WriteLine("That was the first ip");
-            System.Console.WriteLine(_lastFreeIP);
-            System.Console.WriteLine("That was the last ip");
-            //System.Console.WriteLine(_netmask);         
-            //System.Console.WriteLine(binIPtoDecimalIP(_firstIP));
-            System.Console.WriteLine("\n\n\n");
-
-            iterateOnSubnet(_firstFreeIP, _broadcastIP, _maskCIDR);
-
         }
         public bool verifyAddressCIDR(string CIDRAddress) {
             Regex CIDRRegex = new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/(([0-9])|([12][0-9])|(3[0-2]))$");
@@ -162,9 +152,9 @@ namespace discovery
             return stringArrayToIP(splittedIP); // this returns a 32 bit long string  (ip, binary, without dots)
         }
 
-        private void iterateOnSubnet(string firstIP, string lastIP, int maskCIDR) {
-            string tempBinIP = firstIP;
-            string endBinIP = lastIP;
+        public void iterateOnSubnet() {
+            string tempBinIP = _firstFreeIP;
+            string endBinIP = _broadcastIP;
             while (tempBinIP != endBinIP) {
                 Console.WriteLine(binIPtoDecimalIP(tempBinIP));
                 tempBinIP = incrementIP(tempBinIP);
