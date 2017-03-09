@@ -11,8 +11,10 @@ namespace discovery
         private  string _networkIP;
         private int _maskCIDR; // like "24"
         private string _netmask; // like "1111111111...100000..0000"
-        private string _firstIP; // binary WITH dots
-        private string _lastIP; // binary WITH dots
+        private string _firstFreeIP; // binary WITH dots
+        private string _lastFreeIP; // binary WITH dots
+        private string _broadcastIP; // binary WITH dots
+
         
         public Subnet(string addr) {
             _CIDRAddress = addr;
@@ -23,14 +25,15 @@ namespace discovery
                 getFirstAndLastIP(_networkIP, _maskCIDR);
 
             }
-            System.Console.WriteLine(_firstIP);
+            System.Console.WriteLine(_firstFreeIP);
             System.Console.WriteLine("That was the first ip");
-            System.Console.WriteLine(_lastIP);
+            System.Console.WriteLine(_lastFreeIP);
             System.Console.WriteLine("That was the last ip");
-            System.Console.WriteLine(_netmask);         
-            System.Console.WriteLine(binIPtoDecimalIP(_firstIP));
-            
-            iterateOnSubnet(_firstIP, _lastIP, _maskCIDR);
+            //System.Console.WriteLine(_netmask);         
+            //System.Console.WriteLine(binIPtoDecimalIP(_firstIP));
+            System.Console.WriteLine("\n\n\n");
+
+            iterateOnSubnet(_firstFreeIP, _broadcastIP, _maskCIDR);
 
         }
         public bool verifyAddressCIDR(string CIDRAddress) {
@@ -49,11 +52,19 @@ namespace discovery
             }
         }
 
-        private string decimalToBin(int stringNumberToConvert) {
-            return Convert.ToString(stringNumberToConvert, 2);
-        }
         private string decimalToBin(string stringNumberToConvert) {
-            return Convert.ToString(Convert.ToInt32(stringNumberToConvert), 2);
+            string returnedString; // will contain a binary value
+            returnedString = Convert.ToString(Convert.ToInt32(stringNumberToConvert), 2);
+            while (returnedString.Length < 8) {
+                returnedString = String.Concat('0', returnedString);
+            }
+            return returnedString;
+        }
+
+        private string decimalToBin(int stringNumberToConvert) {
+            // surcharge permettant de passer un int plutôt qu'une string      
+            string currentInt = stringNumberToConvert.ToString();
+            return decimalToBin(currentInt);
         }
 
         private string binToDecimal(string stringNumberToConvert) {
@@ -66,10 +77,6 @@ namespace discovery
             for (int i = 0; i < ipToConvert.Split(".").Length; i++)
             {
                 toConcat = decimalToBin(ipToConvert.Split(".")[i]);
-                while (toConcat.Length < 8)
-                {
-                    toConcat = String.Concat('0', toConcat);
-                }
                 tempIP = String.Concat(tempIP, toConcat); 
             }
             return tempIP;
@@ -102,10 +109,15 @@ namespace discovery
                 tempFirstIPChar[i] = '0';
                 tempLastIPChar[i] = '1';
             }
+            // Get first free IP : firt IP after subnet's IP
             tempFirstIPChar[31] = '1';
+            _firstFreeIP = binIPtoBinIPWithDots(new string(tempFirstIPChar));
+            // Get last free IP : last free IP before broadcast address
             tempLastIPChar[31] = '0';
-            _firstIP = binIPtoBinIPWithDots(new string(tempFirstIPChar));
-            _lastIP = binIPtoBinIPWithDots(new string(tempLastIPChar));
+            _lastFreeIP = binIPtoBinIPWithDots(new string(tempLastIPChar));
+            // et broadcast address : last address of subnet
+            tempLastIPChar[31] = '1';
+            _broadcastIP = binIPtoBinIPWithDots(new string(tempLastIPChar));
         }
 
         private string[] IPtoStringArray(string iPtoConvert) {
@@ -113,11 +125,12 @@ namespace discovery
         }
 
         private string stringArrayToIP(string [] stringArray) {
-            return String.Concat(stringArray[0], stringArray[1], stringArray[2], stringArray[3]);
+            // takes a string array and returns the concatenations of all the array and dots (array with values 192,168,0,1 as paramater returns "192.168.0.1")
+            return String.Concat(stringArray[0], ".", stringArray[1], ".", stringArray[2], ".", stringArray[3]);
         }
 
         private string incrementIP(string ipToInc) {
-            // argument must be an addresse binary formatted with dots as 00010001.10110110.00101011.00110101
+            // argument must be an address binary formatted with dots as 00010001.10110110.00101011.00110101
             string[] splittedIP = ipToInc.Split('.');
             if (splittedIP[3] == "11111111") {
                 if (splittedIP[2] == "11111111") {
@@ -129,31 +142,24 @@ namespace discovery
                             splittedIP[3] = "00000000";
                             splittedIP[2] = "00000000";
                             splittedIP[1] = "00000000";
-                            splittedIP[0] = decimalToBin(binToDecimal(splittedIP[0] + 1));
+                            splittedIP[0] = decimalToBin(Convert.ToInt32(binToDecimal(splittedIP[0])) +1 );
                         }
                     }
                     else {
                         splittedIP[3] = "00000000";
                         splittedIP[2] = "00000000";
-                        splittedIP[1] = decimalToBin(binToDecimal(splittedIP[1] + 1));
+                        splittedIP[1] = decimalToBin(Convert.ToInt32(binToDecimal(splittedIP[1])) +1 );
                     }
                 }
                 else {
                     splittedIP[3] = "00000000";
-                    splittedIP[2] = decimalToBin(binToDecimal(splittedIP[2] + 1));
+                    splittedIP[2] = decimalToBin(Convert.ToInt32(binToDecimal(splittedIP[2])) +1 );
                 }
             }
             else {
-                Console.WriteLine("splitted 3 c'est");
-                Console.WriteLine(splittedIP[3]);
-                Console.WriteLine(binToDecimal(splittedIP[3]));
-                Console.WriteLine(binToDecimal(splittedIP[3]) +1 );
-                Console.WriteLine("=============\n");
-
-                splittedIP[3] = decimalToBin(binToDecimal(splittedIP[3]) + 1);
-                //Console.WriteLine(splittedIP[3]);
+                splittedIP[3] = decimalToBin(Convert.ToInt32(binToDecimal(splittedIP[3])) +1 );
             }
-            return stringArrayToIP(splittedIP);
+            return stringArrayToIP(splittedIP); // this returns a 32 bit long string  (ip, binary, without dots)
         }
 
         private void iterateOnSubnet(string firstIP, string lastIP, int maskCIDR) {
@@ -161,7 +167,7 @@ namespace discovery
             string endBinIP = lastIP;
             while (tempBinIP != endBinIP) {
                 Console.WriteLine(binIPtoDecimalIP(tempBinIP));
-                incrementIP(tempBinIP);
+                tempBinIP = incrementIP(tempBinIP);
             }
         }
     }
