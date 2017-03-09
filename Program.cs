@@ -13,7 +13,7 @@ namespace discovery
 
             test.Write("yap", "666");
             Console.WriteLine(test.Read("yap"));*/
-            Subnet yop = new Subnet("192.168.1.0/12");
+            Subnet yop = new Subnet("192.168.1.0/24");
         }
     }
 }
