@@ -79,7 +79,7 @@ namespace discovery
             return String.Concat(binToDecimal(stringNumberToConvert.Substring(0, 8)), '.', binToDecimal(stringNumberToConvert.Substring(8, 8)), '.', binToDecimal(stringNumberToConvert.Substring(16, 8)), '.', binToDecimal(stringNumberToConvert.Substring(24, 8)));
         }
 
-        private void getFirstIP(string networkIP, int maskCIDR) {
+        private void getFirstAndLastIP(string networkIP, int maskCIDR) {
             string networkBinIP = decimalIPtoBinIP(networkIP);
             char[] tempFirstIPChar = networkBinIP.ToCharArray(0, 32);
             char[] tempLastIPChar = networkBinIP.ToCharArray(0, 32);
@@ -94,9 +94,5 @@ namespace discovery
             _firstIP = new string(tempFirstIPChar);
             _lastIP = new string(tempLastIPChar);
         }
-
-        /*private int[] getLastIP() {
-            
-        }*/
     }
 }
