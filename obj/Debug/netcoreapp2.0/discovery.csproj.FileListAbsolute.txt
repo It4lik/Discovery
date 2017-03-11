@@ -6,3 +6,4 @@
 /home/it4/Documents/cours/dotnet/discovery/bin/Debug/netcoreapp2.0/discovery.pdb
 /home/it4/Documents/cours/dotnet/discovery/obj/Debug/netcoreapp2.0/discovery.dll
 /home/it4/Documents/cours/dotnet/discovery/obj/Debug/netcoreapp2.0/discovery.pdb
+/home/it4/Documents/cours/dotnet/discovery/obj/Debug/netcoreapp2.0/RemoveDepsFileConflicts.semaphore
