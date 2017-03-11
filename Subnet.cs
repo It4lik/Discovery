@@ -125,36 +125,32 @@ namespace discovery
         }
 
         private string incrementIP(string ipToInc) {
-            // argument must be an address binary formatted with dots as 00010001.10110110.00101011.00110101
+            // Argument must be an address binary formatted with dots as 00010001.10110110.00101011.00110101
             string[] splittedIP = ipToInc.Split('.');
-            if (splittedIP[3] == "11111111") {
-                if (splittedIP[2] == "11111111") {
-                    if (splittedIP[1] == "11111111") {
-                        if (splittedIP[0] == "11111111") {
-                            return ipToInc; // max value reached : 255.255.255.255. This method does not treat a maxValue (expect max value that an IPv4 can hold)
-                        }
-                        else {
-                            splittedIP[3] = "00000000";
-                            splittedIP[2] = "00000000";
-                            splittedIP[1] = "00000000";
-                            splittedIP[0] = decimalToBin(Convert.ToInt32(binToDecimal(splittedIP[0])) +1 );
-                        }
-                    }
+            // For each byte
+            for (var i = 3 ; i >= 0 ; i--){
+                // This byte has reached max value
+                if(splittedIP[i] == "11111111")
+                { 
+                    // This is the bigger byte
+                    if (i == 0 ) 
+                        throw new Exception("Max value reached : 255.255.255.255. This method does not treat a maxValue (expect max value that an IPv4 can hold)");
                     else {
-                        splittedIP[3] = "00000000";
-                        splittedIP[2] = "00000000";
-                        splittedIP[1] = decimalToBin(Convert.ToInt32(binToDecimal(splittedIP[1])) +1 );
+                        // Init rigth's bytes
+                        splittedIP[i] = "00000000";
+                        // Next byte
+                        continue;
                     }
                 }
-                else {
-                    splittedIP[3] = "00000000";
-                    splittedIP[2] = decimalToBin(Convert.ToInt32(binToDecimal(splittedIP[2])) +1 );
+                else
+                {
+                    // Inc current byte
+                    splittedIP[i] = decimalToBin(Convert.ToInt32(binToDecimal(splittedIP[i])) +1 );
+                    // this returns a 32 bit long string  (ip, binary, without dots)
+                    return stringArrayToIP(splittedIP);
                 }
             }
-            else {
-                splittedIP[3] = decimalToBin(Convert.ToInt32(binToDecimal(splittedIP[3])) +1 );
-            }
-            return stringArrayToIP(splittedIP); // this returns a 32 bit long string  (ip, binary, without dots)
+            
         }
 
         public void iterateOnSubnet() {
