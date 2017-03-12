@@ -22,7 +22,7 @@ namespace discovery
 
 
             // Console.WriteLine(Check.TCPTestHost("192.168.1.94", 8888));
-            Check.CustomTest("192.168.1.94", 8888, "C:\\Windows\\System32\\bash.exe -c \"ls\"");
+            Check.CustomTest("192.168.1.94", 8888, "C:\\Windows\\System32\\bash.exe", "-c \"ls\"");
         }
     }
 }

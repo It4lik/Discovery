@@ -38,7 +38,7 @@ namespace discovery
             return isHostReachable;
         }
 
-        public static bool CustomTest(string hostIPAddress, int hostTargetedPort, string shellCommand) {
+        public static bool CustomTest(string hostIPAddress, int hostTargetedPort, string shellCommand, string args) {
             // Used to issue custom checks using a shell on server-side. 
             // The user who will run these commands is the same wha run this program.
             
@@ -48,7 +48,9 @@ namespace discovery
             // Create the ProcessStartInfo instance used to describe a process who run the check
             ProcessStartInfo psi = new ProcessStartInfo();
             psi.FileName = shellCommand;
+            psi.Arguments = args;
             psi.UseShellExecute = false;
+            psi.RedirectStandardOutput = true;
 
             // Create the process used to actually issue the command
             Process proc = new Process();
@@ -58,12 +60,12 @@ namespace discovery
             try
             {
                 proc.Start();
+                System.Console.WriteLine("Process executed successfully.");
                 isHostReachable = true;
             }
             catch (System.Exception)
             {
                 System.Console.WriteLine("ERROR : commmand " + proc.StartInfo.FileName + " failed !");
-                System.Console.WriteLine(proc.);
                 isHostReachable = false;
             }
             // Cleanup
