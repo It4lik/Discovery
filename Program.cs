@@ -15,12 +15,14 @@ namespace discovery
             test.Write("yap", "666");
             Console.WriteLine(test.Read("yap"));*/
             
+
+
+
             Subnet yop = new Subnet("192.168.1.0/24");
             Scan.TCPscan(yop.getAllIPsInSubnet(), 8888);
 
             /*TcpClient yo = new TcpClient();
             Console.WriteLine( yo.ConnectAsync("192.168.1.94", 8888).Wait(10000));*/
-
 
                 
             // Console.WriteLine(Check.TCPTestHost("192.168.1.94", 8888));

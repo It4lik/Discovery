@@ -11,21 +11,29 @@ namespace discovery
 {
     public static class Scan
     {
-        public static bool TCPTestHost(string hostIPAddress, int hostTargetedPort) {
+        public static bool TCPTestHost(string hostIPAddress, int hostTargetedPort, int timeout = 50) {
             // Test a host using a simple TCP connection (TcpClient.ConnectAsync method)
 
             // Create the TcpClient used to connect
-            TcpClient connection = new TcpClient();
+            Socket connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            // Set timeout to value in parameter (default 2000)
+            connection.SendTimeout = timeout;
+            connection.ReceiveTimeout = timeout;
 
             bool isHostReachable;
             try
             {
-                // The Wait method will return True if the connection was successful, OR throw an exception if the connection fails. 
-                isHostReachable = connection.ConnectAsync(hostIPAddress, hostTargetedPort).Wait(1000);
-                // Print successful message
-                System.Console.WriteLine("Host " + hostIPAddress + " is REACHABLE on port " + hostTargetedPort + " using TCP check.");
-                // Set return value to true
-                isHostReachable = true;
+                // Connect to remote host 
+                connection.ConnectAsync(hostIPAddress, hostTargetedPort);
+                System.Threading.Thread.Sleep(timeout);
+
+                if (connection.Connected) {
+                    // Print successful message
+                    System.Console.WriteLine("Host " + hostIPAddress + " is REACHABLE on port " + hostTargetedPort + " using TCP check.");
+                }
+
+                // Set return value to true if connection succeeded, false if not
+                isHostReachable = connection.Connected;
             }
             catch (System.Exception)
             {
@@ -100,7 +108,7 @@ namespace discovery
             // Iterate on an IP address list returned from iterateOnSubnet method
             foreach (string currentIp in targetedIPs) {
                 // If a host is up at currentIp and has targetedPort open for TCP
-                if (Scan.TCPTestHost(currentIp, targetedPort)) {
+                if (TCPTestHost(currentIp, targetedPort)) {
                     aliveHostsNumber ++;
                     // Add current host ro returned list
                     aliveHosts.Add(currentIp);        
