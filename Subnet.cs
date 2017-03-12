@@ -111,18 +111,28 @@ namespace discovery
                     break;
             }
         }
-        public void iterateOnSubnet() {
-            string tempBinIP = _firstFreeIP;
-            string endBinIP = _broadcastIP;
+        public List<string> iterateOnSubnet() {
+            string tempBinIP = _firstFreeIP; string endBinIP = _broadcastIP;
+            string[] IPs = new string[]; 
+            int i = 0;
             while (tempBinIP != endBinIP) {
-                Console.WriteLine(binIPtoDecimalIP(tempBinIP));
+                IPs[i] = binIPtoDecimalIP(tempBinIP);
+                // Console.WriteLine(binIPtoDecimalIP(tempBinIP)); // Debug console output
                 tempBinIP = incrementIP(tempBinIP);
+                i++;
             }
+            return IPs;
         }
         private bool verifyAddressCIDR(string CIDRAddress) {
             // Used to verify that a string is a subnet IPv4 address formatted in CIDR (as in "192.168.1.0/24)
             Regex CIDRRegex = new Regex(@"^(([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/(([1-9])|([12][0-9])|(3[0-2]))$");
             return CIDRRegex.IsMatch(CIDRAddress);
+        }
+
+        public void TCPscan() {
+            foreach (string currentIp in iterateOnSubnet()) {
+                Console.WriteLine(currentIp);
+            }
         }
     }
 }

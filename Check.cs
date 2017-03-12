@@ -1,3 +1,4 @@
+using System;
 // Used for TCP connections
 using System.Net.Sockets;
 // Used to issue shell commands
@@ -42,6 +43,15 @@ namespace discovery
             // Used to issue custom checks using a shell on server-side. 
             // The user who will run these commands is the same wha run this program.
             
+            // Replace host and port with their proper values
+            shellCommand.Replace("%HOST%", hostIPAddress);
+            shellCommand.Replace("%PORT%", hostTargetedPort.ToString());
+
+            // Print warning if OS is not Linux : custom checks are basically used to issue bash or sh commands
+            if ( ! System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux)) {
+                Console.WriteLine("WARNING : Custom checks are only supported on Linux. It's experimental on other platforms.");
+            }
+
             // Return value
             bool isHostReachable;
 
@@ -51,21 +61,24 @@ namespace discovery
             psi.Arguments = args;
             psi.UseShellExecute = false;
             psi.RedirectStandardOutput = true;
+            psi.RedirectStandardError = true;
 
             // Create the process used to actually issue the command
             Process proc = new Process();
             proc.StartInfo = psi;
-
             // Start the process (eg issue the check)
             try
             {
                 proc.Start();
-                System.Console.WriteLine("Process executed successfully.");
+                // If the process success, the check has succeed. Print succeed message and set return value to true. 
+                Console.WriteLine("Process executed successfully.");
                 isHostReachable = true;
             }
-            catch (System.Exception)
+            catch (Exception ex)
             {
-                System.Console.WriteLine("ERROR : commmand " + proc.StartInfo.FileName + " failed !");
+                // If the command fails, prints original error and set return value to false
+                Console.WriteLine("ERROR : commmand " + proc.StartInfo.FileName + " failed !");
+                Console.WriteLine(ex.Message);
                 isHostReachable = false;
             }
             // Cleanup
