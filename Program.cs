@@ -16,8 +16,6 @@ namespace discovery
             Console.WriteLine(test.Read("yap"));*/
             
 
-
-
             Subnet yop = new Subnet("192.168.1.0/24");
             Scan.TCPscan(yop.getAllIPsInSubnet(), 8888);
 

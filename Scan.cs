@@ -6,7 +6,6 @@ using System.Net.Sockets;
 // Used to issue shell commands
 using System.Diagnostics;
 
-
 namespace discovery
 {
     public static class Scan

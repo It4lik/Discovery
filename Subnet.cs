@@ -123,7 +123,7 @@ namespace discovery
                 // Add current IP to the IPs list
                 IPs.Add(binIPtoDecimalIP(currentBinIP));
 
-                // Console.WriteLine(binIPtoDecimalIP(tempBinIP)); // Debug console output
+                // Console.WriteLine(binIPtoDecimalIP(currentBinIP)); // Debug console output
 
                 // Increment current IP
                 currentBinIP = incrementIP(currentBinIP);
