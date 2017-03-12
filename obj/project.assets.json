@@ -7176,7 +7176,8 @@
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v1.1": [
       "Microsoft.NETCore.App >= 1.1.1",
-      "StackExchange.Redis >= 1.2.0"
+      "StackExchange.Redis >= 1.2.0",
+      "System.Net.Sockets >= 4.3.0"
     ]
   },
   "packageFolders": {
@@ -7185,16 +7186,16 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\It4\\Documents\\Work\\Gits\\Discovery\\Discovery\\discovery.csproj",
+      "projectUniqueName": "c:\\Users\\It4\\Documents\\Work\\Gits\\Discovery\\Discovery\\discovery.csproj",
       "projectName": "discovery",
-      "projectPath": "C:\\Users\\It4\\Documents\\Work\\Gits\\Discovery\\Discovery\\discovery.csproj",
-      "outputPath": "C:\\Users\\It4\\Documents\\Work\\Gits\\Discovery\\Discovery\\obj\\",
+      "projectPath": "c:\\Users\\It4\\Documents\\Work\\Gits\\Discovery\\Discovery\\discovery.csproj",
+      "outputPath": "c:\\Users\\It4\\Documents\\Work\\Gits\\Discovery\\Discovery\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netcoreapp1.1"
       ],
       "files": {
-        "lib/netcoreapp1.1/discovery.dll": "C:\\Users\\It4\\Documents\\Work\\Gits\\Discovery\\Discovery\\bin\\placeholder\\netcoreapp1.1\\discovery.dll"
+        "lib/netcoreapp1.1/discovery.dll": "c:\\Users\\It4\\Documents\\Work\\Gits\\Discovery\\Discovery\\bin\\placeholder\\netcoreapp1.1\\discovery.dll"
       },
       "frameworks": {
         "netcoreapp1.1": {
@@ -7212,6 +7213,10 @@
           "StackExchange.Redis": {
             "target": "Package",
             "version": "1.2.0"
+          },
+          "System.Net.Sockets": {
+            "target": "Package",
+            "version": "4.3.0"
           }
         }
       }

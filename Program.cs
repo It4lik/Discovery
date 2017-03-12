@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Net;
+using System.Net.Sockets;
 namespace discovery
 {
     class Program
@@ -11,8 +13,16 @@ namespace discovery
 
             test.Write("yap", "666");
             Console.WriteLine(test.Read("yap"));*/
-            Subnet yop = new Subnet("192.168.1.0/22");
-            yop.iterateOnSubnet();
+            
+            /*Subnet yop = new Subnet("192.168.1.0/22");
+            yop.iterateOnSubnet();*/
+           
+            string y = "192.168.1.94";
+
+            TcpClient test = new TcpClient();
+            test.ConnectAsync(y, 8888);
+            test.Available()
+            Console.WriteLine(test.Connected);
         }
     }
 }
