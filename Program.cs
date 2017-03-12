@@ -4,9 +4,7 @@ namespace discovery
     class Program
     {
         static void Main(string[] args)
-        {
-            
-            
+        {            
             /*Console.WriteLine("Starting...");
             Stocker test = new Stocker("172.17.0.2", 6379);
             Console.WriteLine(test.GetHost());

@@ -8,9 +8,9 @@ namespace discovery
         protected string decimalIPtoBinIP(string ipToConvert) {
             // convert a "192.168.1.0" address to his binary equivalet WITHOUT the dots (eg. a 32 characters long string (binary))
             string tempIP = string.Empty; string toConcat = string.Empty;
-            for (int i = 0; i < ipToConvert.Split(".").Length; i++)
+            for (int i = 0; i < ipToConvert.Split('.').Length; i++)
             {
-                toConcat = BinaryTools.decimalToBin(ipToConvert.Split(".")[i]);
+                toConcat = BinaryTools.decimalToBin(ipToConvert.Split('.')[i]);
                 tempIP = String.Concat(tempIP, toConcat); 
             }
             return tempIP;

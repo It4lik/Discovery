@@ -1,0 +1,53 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v1.1",
+    "signature": "449ac0641ee0306b23cc29045a4859bbed9a542f"
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v1.1": {
+      "discovery/1.0.0": {
+        "dependencies": {
+          "StackExchange.Redis": "1.2.0"
+        },
+        "runtime": {
+          "discovery.dll": {}
+        }
+      },
+      "stackexchange.redis/1.2.0": {
+        "dependencies": {
+          "System.Collections.NonGeneric": "4.0.1"
+        },
+        "runtime": {
+          "lib/netstandard1.5/StackExchange.Redis.dll": {}
+        }
+      },
+      "system.collections.nongeneric/4.0.1": {
+        "runtime": {
+          "lib/netstandard1.3/System.Collections.NonGeneric.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "discovery/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "stackexchange.redis/1.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-RXi3cs12LsEVZoPW2RnHEkiKoRw8aCivJUi4JFbW6ym6OaANkoJq/BRrorb3XBHsCMfoyOm3PGMuAGibll6FbA==",
+      "path": "stackexchange.redis/1.2.0",
+      "hashPath": "stackexchange.redis.1.2.0.nupkg.sha512"
+    },
+    "system.collections.nongeneric/4.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-QUQXovrCV7GiIX+sV31rUReS3GqIM7IPONxfWmrwHIQQNi41ZkhoFiWpYyhUn2b6BLDdpkiLzqGirzodbnjMWg==",
+      "path": "system.collections.nongeneric/4.0.1",
+      "hashPath": "system.collections.nongeneric.4.0.1.nupkg.sha512"
+    }
+  }
+}
