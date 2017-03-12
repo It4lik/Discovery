@@ -21,7 +21,7 @@ namespace discovery
             try
             {
                 // The Wait method will return True if the connection was successful, OR throw an exception if the connection fails. 
-                //isHostReachable = connection.ConnectAsync(hostIPAddress, hostTargetedPort);
+                isHostReachable = connection.ConnectAsync(hostIPAddress, hostTargetedPort).Wait(1000);
                 // Print successful message
                 System.Console.WriteLine("Host " + hostIPAddress + " is REACHABLE on port " + hostTargetedPort + " using TCP check.");
                 // Set return value to true
