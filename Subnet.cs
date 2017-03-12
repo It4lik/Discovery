@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 namespace discovery
 {
@@ -111,15 +112,21 @@ namespace discovery
                     break;
             }
         }
-        public List<string> iterateOnSubnet() {
-            string tempBinIP = _firstFreeIP; string endBinIP = _broadcastIP;
-            string[] IPs = new string[]; 
-            int i = 0;
-            while (tempBinIP != endBinIP) {
-                IPs[i] = binIPtoDecimalIP(tempBinIP);
+        public List<string> getAllIPsInSubnet() {
+            // Temp variables used to iterate from the first to the last IP
+            string currentBinIP = _firstFreeIP; string endBinIP = _broadcastIP;
+            // Return value. Will contain all IPs in the subnet
+            List<string> IPs = new List<string>();
+
+            // Iterate on all IPs = start from the first, increment, till the currentBinIP does not treach tha last IP, eg the endBinIP (often the broadcast address of a subnet)
+            while (currentBinIP != endBinIP) {
+                // Add current IP to the IPs list
+                IPs.Add(binIPtoDecimalIP(currentBinIP));
+
                 // Console.WriteLine(binIPtoDecimalIP(tempBinIP)); // Debug console output
-                tempBinIP = incrementIP(tempBinIP);
-                i++;
+
+                // Increment current IP
+                currentBinIP = incrementIP(currentBinIP);
             }
             return IPs;
         }
@@ -127,12 +134,6 @@ namespace discovery
             // Used to verify that a string is a subnet IPv4 address formatted in CIDR (as in "192.168.1.0/24)
             Regex CIDRRegex = new Regex(@"^(([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/(([1-9])|([12][0-9])|(3[0-2]))$");
             return CIDRRegex.IsMatch(CIDRAddress);
-        }
-
-        public void TCPscan() {
-            foreach (string currentIp in iterateOnSubnet()) {
-                Console.WriteLine(currentIp);
-            }
         }
     }
 }

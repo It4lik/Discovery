@@ -1,12 +1,15 @@
 using System;
+using System.Collections.Generic;
+
 // Used for TCP connections
 using System.Net.Sockets;
 // Used to issue shell commands
 using System.Diagnostics;
 
+
 namespace discovery
 {
-    public static class Check
+    public static class Scan
     {
         public static bool TCPTestHost(string hostIPAddress, int hostTargetedPort) {
             // Test a host using a simple TCP connection (TcpClient.ConnectAsync method)
@@ -18,7 +21,7 @@ namespace discovery
             try
             {
                 // The Wait method will return True if the connection was successful, OR throw an exception if the connection fails. 
-                isHostReachable = connection.ConnectAsync(hostIPAddress, hostTargetedPort).Wait(10000);
+                //isHostReachable = connection.ConnectAsync(hostIPAddress, hostTargetedPort);
                 // Print successful message
                 System.Console.WriteLine("Host " + hostIPAddress + " is REACHABLE on port " + hostTargetedPort + " using TCP check.");
                 // Set return value to true
@@ -84,6 +87,31 @@ namespace discovery
             // Cleanup
             proc.Dispose();
             return isHostReachable;
+        }
+      
+        public static List<string> TCPscan(List<string> targetedIPs, int targetedPort) {
+            // Total number of scanned hosts (253 for a /24 subnet)
+            int totalScannedHosts = 0; 
+            // Total number of alive host (eg TCP check succeeded)
+            int aliveHostsNumber = 0;
+            // List that will contain the IP address of all successful hosts
+            List<string> aliveHosts = new List<string>();
+
+            // Iterate on an IP address list returned from iterateOnSubnet method
+            foreach (string currentIp in targetedIPs) {
+                // If a host is up at currentIp and has targetedPort open for TCP
+                if (Scan.TCPTestHost(currentIp, targetedPort)) {
+                    aliveHostsNumber ++;
+                    // Add current host ro returned list
+                    aliveHosts.Add(currentIp);        
+                }
+                totalScannedHosts ++;
+            }
+
+            // Debug console output
+            Console.WriteLine("Number of hosts scanned : " + totalScannedHosts + ". Alive hosts : " + aliveHostsNumber + ".");
+
+            return aliveHosts;
         }
     }
 }
