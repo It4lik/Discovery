@@ -18,12 +18,13 @@ namespace discovery
         private string _broadcastIP; // Last IP address of subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.11111111".
 
         
-        public Subnet(string addr) {
-            _CIDRAddress = addr;
+        public Subnet(string _CIDRAddress) {
+            // Verify that address is correctly formatted
             if (this.verifyAddressCIDR(_CIDRAddress)) {
                 _maskCIDR = System.Convert.ToInt32(_CIDRAddress.Split('/')[1]);
                 _networkIP = this.setNetworkIP(_maskCIDR, _CIDRAddress.Split('/')[0]);
                 _netmask = this.setNetmask(_networkIP, _maskCIDR);
+                // Set _firstFreeIP, _lastFreeIP and _broadcastIP properties
                 this.setAllUsefulIPs(_networkIP, _maskCIDR);
             }
         }
