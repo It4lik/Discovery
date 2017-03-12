@@ -9,7 +9,7 @@ namespace discovery
         // This is gonna be exploded into an interface and a "Subnet" class that we can instantiate with one subnet (CIDR format) 
         private enum UsefulIPs {broadcast, firstFree, lastFree, network};
         private string _CIDRAddress; // Subnet address, CIDR format. Ex : "192.168.1.13/24"
-        private  string _inputIP; // Input IP (splitted CIDR with /). Ex : "192.168.1.13"
+        private  string _networkBinIP; // Only subnet address, binary formatted, without dots. Ex : "11001010110100101010001100010010"
         private  string _networkIP; // Only subnet address. Ex : "192.168.1.0"
         private int _maskCIDR; // Only mask, CIDR format. Ex : 24
         private string _netmask; // Only mask, binary format, NO DOTS, 32 chars. Ex : "11111111111111111100000000000000"
@@ -22,13 +22,13 @@ namespace discovery
             _CIDRAddress = addr;
             if (this.verifyAddressCIDR(_CIDRAddress)) {
                 _maskCIDR = System.Convert.ToInt32(_CIDRAddress.Split('/')[1]);
-                _networkIP = this.getNetworkIP(_maskCIDR, _CIDRAddress);
-                this.getNetmask(_inputIP, _maskCIDR);
-                setFirstAndLastIP(_inputIP, _maskCIDR);
+                _networkIP = this.setNetworkIP(_maskCIDR, _CIDRAddress.Split('/')[0]);
+                _netmask = this.setNetmask(_networkIP, _maskCIDR);
+                this.setAllUsefulIPs(_networkIP, _maskCIDR);
             }
         }
 
-        private string getNetmask(string netIP, int maskCIDR) {
+        private string setNetmask(string netIP, int maskCIDR) {
             // Get netmask : iterate on subnet IPv4 address ||| from 0 to maskCIDR and fill with 1 ||| from maskCIDR to 32 (bits number in an IPv4 address) and fill with 0
             string netmask = string.Empty;
             for (int i = 0; i < maskCIDR; i++)
@@ -42,21 +42,21 @@ namespace discovery
             return netmask;
         }
 
-        private string getNetworkIP(int netmask, string ipAddress) {
-            string binIpAdress = decimalIPtoBinIP(ipAddress);
-            string networkIpAddress = string.Empty;
+        private string setNetworkIP(int netmask, string ipAddress) {
+            string binIpAddress = decimalIPtoBinIP(ipAddress);
+            string networkBinIpAddress = string.Empty;
             for (int i = 0; i < netmask; i++)
             {
-                networkIpAddress = String.Concat(networkIpAddress, ipAddress[i]);
+                networkBinIpAddress = String.Concat(networkBinIpAddress, binIpAddress[i]);
             }
             for (int i = netmask; i < 32; i++)
             {
-                networkIpAddress = String.Concat(networkIpAddress, '0');
+                networkBinIpAddress = String.Concat(networkBinIpAddress, '0');
             }
-            return networkIpAddress;
+            return binIPtoDecimalIP(binIPtoBinIPWithDots(networkBinIpAddress));
         }
 
-        private void setFirstAndLastIP(string networkIP, int maskCIDR) {
+        private void setAllUsefulIPs(string networkIP, int maskCIDR) {
             // get first free address, last free address and the broadcast address
             string networkBinIP = decimalIPtoBinIP(networkIP);
             char[] tempFirstIPChar = networkBinIP.ToCharArray(0, 32);
