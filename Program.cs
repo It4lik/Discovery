@@ -21,9 +21,8 @@ namespace discovery
             Console.WriteLine( yo.ConnectAsync("192.168.1.94", 8888).Wait(10000));*/
 
 
-            Check test = new Check(Check.CheckType.tcp);
-            Console.WriteLine(test.TCPTestHost("192.168.1.94", 8888));
-
+            // Console.WriteLine(Check.TCPTestHost("192.168.1.94", 8888));
+            Check.CustomTest("192.168.1.94", 8888, "C:\\Windows\\System32\\bash.exe -c \"ls\"");
         }
     }
 }
