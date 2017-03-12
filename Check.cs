@@ -18,10 +18,20 @@ namespace discovery
             _customCheck = command;
         }
 
-        public bool TCPTestHost(string hostIPAddress, int hostTargetedPort, TcpClient tcp) {
-            //tcp.ConnectAsync
-            
-            return false;
+        public bool TCPTestHost(string hostIPAddress, int hostTargetedPort) {
+            bool isHostReachable;
+            try
+            {
+                isHostReachable = _tcp.ConnectAsync(hostIPAddress, hostTargetedPort).Wait(10000);
+                System.Console.WriteLine("Host " + hostIPAddress + " is REACHABLE on port " + hostTargetedPort + " using TCP check.");
+                isHostReachable = true;
+            }
+            catch (System.Exception)
+            {
+                System.Console.WriteLine("ERROR : Host " + hostIPAddress + " is NOT reachable on port " + hostTargetedPort + " using TCP check.");
+                isHostReachable = false;
+            }
+            return isHostReachable;
         }
     }
 }

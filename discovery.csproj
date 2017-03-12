@@ -6,6 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis" Version="1.2.0"/>
-    <PackageReference Include="System.Net.Sockets" Version="4.3.0"/>
+    <PackageReference Include="System.Net.Sockets" Version="*"/>
   </ItemGroup>
 </Project>
