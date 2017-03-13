@@ -16,13 +16,17 @@ namespace discovery
         private Subnet _targetedSubnet; // Subnet on which issue checks. 
         private int _targetedPort; // Targeted port of hosts.
         private Stocker _redis; // Holds the current redis connection.
+        private HostAction _actionIfUp; // Holds the action to do when finding a host
+        private HostAction _actionIfDown; // Holds the action to do when a host disapppeared
         private string _discoveryName; // Arbitrary name.
-        public Discover(CheckType checkType, Subnet targetedSubnet, int port, Stocker redis, string discoveryName) {
+        public Discover(CheckType checkType, Subnet targetedSubnet, int port, HostAction actionIfUp, HostAction actionIfDown, Stocker redis, string discoveryName) {
             // Initalize object properties
             _checkType = checkType;
             _targetedSubnet = targetedSubnet;
             _targetedPort = port;
             _redis = redis;
+            _actionIfUp = actionIfUp;
+            _actionIfDown = actionIfDown;
             _discoveryName = discoveryName;
             _cts = new CancellationTokenSource();
             // Initialize the _discovery thread with targeted check and subnet (checkType, targetedSubnet)
@@ -74,12 +78,11 @@ namespace discovery
             List<string> existingHosts = new List<string>();
 
             //while (true) {
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 1; i++) {
                 // Used to store aliveHosts detected by check
                 aliveHosts = Scan.TCPScan(_targetedSubnet.getAllIPsInSubnet(), _targetedPort);
                 existingHosts =  _redis.GetSubnetHosts(_discoveryName);
                 
-
                 if(cancelToken.IsCancellationRequested) {
                     // If stopDiscovery() was called. That means that someone wants to stop the discovery, and thus, this thread. 
                     // Cleanup and exit the while loop.  
@@ -87,28 +90,41 @@ namespace discovery
                     return;
                 }
 
+                /*
                 // Delete host in redis if it's not alive
                 // For each hosts in Redis (existingHost list)
                 //  - print not alive host in console
                 //  - mark the host as "DOWN" in redis
+                //  - execute _actionIfDown
+                */
                 foreach (string existingHost in existingHosts) {
-                    Console.WriteLine("currenthost {0} in aliveHost", existingHost);
+                    // If the host is in redis as "UP", but not in current alive hosts list
                     if ( (! aliveHosts.Contains(existingHost)) && (_redis.Read(_discoveryName, existingHost) == "UP") ) {
                         Console.WriteLine("{0}: Deleting {1} which is not alive.", _discoveryName, existingHost); // Debug console output
+                        // Mark the host as down in redis
                         _redis.markHostDown(_discoveryName, existingHost);
+                        // Execute action _actionIfDown
+                        _actionIfDown.Execute(existingHost);
                     }
                 }
 
+                /* 
                 // Work on current alive hosts :
                 //  - print found host in console
                 //  - add found host in Redis if not exists, as "UP"
+                //  - execute _actionIfUp 
+                */
                 foreach (string aliveHost in aliveHosts) {
+                    // If the host is alive and doesn't exist in redis or marked as DOWN
                     if ( (! _redis.doesKeyExist(_discoveryName, aliveHost)) || (_redis.Read(_discoveryName, aliveHost) == "DOWN")) {
                         Console.WriteLine("{0}: Host {1} was not in Redis. Adding it.", _discoveryName, aliveHost); // Debug console output
+                        // Mark the host as UP in redis
                         _redis.Write(_discoveryName, aliveHost);
+                        // Execute the _actionIfUp action
+                        _actionIfUp.Execute(aliveHost);
                     }
                     else {
-                        Console.WriteLine("{0}: Host {1} was already in Redis :) Le read : {2}", _discoveryName, aliveHost, _redis.Read(_discoveryName, aliveHost)); // Debug console output
+                        Console.WriteLine("{0}: Host {1} was already in Redis ! Value : {2}", _discoveryName, aliveHost, _redis.Read(_discoveryName, aliveHost)); // Debug console output
                     }
                 }
             }

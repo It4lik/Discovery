@@ -23,9 +23,18 @@ namespace discovery
             // The constructor is basically used to initialize Redis' connection
             // That means that each instance of this class will instantiate a new Redis' connection (to same Redis instance, or not)
             _redisHost = string.Concat(redisHost, ":", redisPort);
-            _redis = ConnectionMultiplexer.Connect(_redisHost);
-            _db = _redis.GetDatabase();
-            _server = _redis.GetServer(redisHost, redisPort);
+            try
+            {
+                _redis = ConnectionMultiplexer.Connect(_redisHost);
+                _db = _redis.GetDatabase();
+                _server = _redis.GetServer(redisHost, redisPort);
+            }
+            catch (System.Exception)
+            {
+                Console.WriteLine("FATAL: Can't connect to Redis. Exiting.");
+                System.Environment.Exit(3);
+            }
+
         }
         
         public string GetRedisHost() {

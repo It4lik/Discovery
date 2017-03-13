@@ -17,10 +17,14 @@ namespace discovery
         }
 
         protected string binIPtoBinIPWithDots(string binIPWithoutDots) {
+            // Convert a binary IP without dots to a binary with dots
+            // Like 01000010111010100101011010101001 to 01001001.10020101.11111011.11001011
             return String.Concat(binIPWithoutDots.Substring(0, 8), '.', binIPWithoutDots.Substring(8, 8), '.', binIPWithoutDots.Substring(16, 8), '.', binIPWithoutDots.Substring(24, 8));
         }
 
         protected string binIPtoBinIPWithoutDots(string binIPWithDots) {
+            // Convert a binary IP with dots to a binary without dots
+            // Like 01001001.10020101.11111011.11001011 to 01000010111010100101011010101001
             return binIPWithDots.Replace(".", "");
         }
 
@@ -49,8 +53,7 @@ namespace discovery
             // For each byte
             for (var i = 3 ; i >= 0 ; i--){
                 // This byte has reached max value
-                if(splittedIP[i] == "11111111")
-                { 
+                if(splittedIP[i] == "11111111") { 
                     // This is the bigger byte
                     if (i == 0 ) 
                         throw new Exception("Max value reached : 255.255.255.255. This method does not treat a maxValue (expect max value that an IPv4 can hold)");

@@ -28,7 +28,7 @@ namespace discovery
 
                 if (connection.Connected) {
                     // Print successful message
-                    System.Console.WriteLine("Host " + hostIPAddress + " is REACHABLE on port " + hostTargetedPort + " using TCP check.");
+                    System.Console.WriteLine("SCAN: " + hostIPAddress + " is REACHABLE on port " + hostTargetedPort + " using TCP check.");
                 }
 
                 // Set return value to true if connection succeeded, false if not
@@ -39,7 +39,7 @@ namespace discovery
                 // An exception is catched if the Wait method fails (eg the TCP connection has failed)
 
                 // Print error message
-                System.Console.WriteLine("ERROR : Host " + hostIPAddress + " is NOT reachable on port " + hostTargetedPort + " using TCP check.");
+                // System.Console.WriteLine("ERROR : Host " + hostIPAddress + " is NOT reachable on port " + hostTargetedPort + " using TCP check.");
                 // Set return value to false
                 isHostReachable = false;
             }
@@ -104,6 +104,9 @@ namespace discovery
             // List that will contain the IP address of all successful hosts
             List<string> aliveHosts = new List<string>();
 
+            // Debut console output
+            Console.WriteLine("SCAN STARTED");
+
             // Iterate on an IP address list returned from iterateOnSubnet method
             foreach (string currentIp in targetedIPs) {
                 // If a host is up at currentIp and has targetedPort open for TCP
@@ -116,7 +119,7 @@ namespace discovery
             }
 
             // Debug console output
-            Console.WriteLine("Number of hosts scanned : " + totalScannedHosts + ". Alive hosts : " + aliveHostsNumber + ".");
+            Console.WriteLine("SCAN RESULT: Number of hosts scanned : " + totalScannedHosts + ". Alive hosts : " + aliveHostsNumber + ".");
 
             return aliveHosts;
         }
