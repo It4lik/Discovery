@@ -9,8 +9,6 @@ namespace discovery
         // Class used to make IPv4 operations
         // This is gonna be exploded into an interface and a "Subnet" class that we can instantiate with one subnet (CIDR format) 
         private enum UsefulIPs {broadcast, firstFree, lastFree, network};
-        private string _CIDRAddress; // Subnet address, CIDR format. Ex : "192.168.1.13/24"
-        private  string _networkBinIP; // Only subnet address, binary formatted, without dots. Ex : "11001010110100101010001100010010"
         private  string _networkIP; // Only subnet address. Ex : "192.168.1.0"
         private int _maskCIDR; // Only mask, CIDR format. Ex : 24
         private string _netmask; // Only mask, binary format, NO DOTS, 32 chars. Ex : "11111111111111111100000000000000"

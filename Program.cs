@@ -17,7 +17,7 @@ namespace discovery
             
 
             Subnet yop = new Subnet("192.168.1.0/24");
-            Scan.TCPscan(yop.getAllIPsInSubnet(), 8888);
+            Scan.TCPScan(yop.getAllIPsInSubnet(), 9999);
 
             /*TcpClient yo = new TcpClient();
             Console.WriteLine( yo.ConnectAsync("192.168.1.94", 8888).Wait(10000));*/
