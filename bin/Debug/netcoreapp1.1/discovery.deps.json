@@ -92,7 +92,7 @@
     "system.collections.nongeneric/4.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-QUQXovrCV7GiIX+sV31rUReS3GqIM7IPONxfWmrwHIQQNi41ZkhoFiWpYyhUn2b6BLDdpkiLzqGirzodbnjMWg==",
+      "sha512": "sha512-IlAzAEMgFahHWVPIK0TqD/zqYlMQJsAGhxxwzunvL+IsVUFRnWa6C3DzaFAsGkaw4zIfoFS7/crhA5QSFIzFSg==",
       "path": "system.collections.nongeneric/4.0.1",
       "hashPath": "system.collections.nongeneric.4.0.1.nupkg.sha512"
     },
