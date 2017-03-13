@@ -1,17 +1,33 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v1.1",
-    "signature": "449ac0641ee0306b23cc29045a4859bbed9a542f"
+    "signature": "5d9fb2d1f0fa1a0aafe57aa0d527aaaef5a83cb2"
   },
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v1.1": {
       "discovery/1.0.0": {
         "dependencies": {
+          "SSH.NET": "2016.0.0",
           "StackExchange.Redis": "1.2.0"
         },
         "runtime": {
           "discovery.dll": {}
+        }
+      },
+      "ssh.net/2016.0.0": {
+        "dependencies": {
+          "SshNet.Security.Cryptography": "1.2.0",
+          "System.Diagnostics.TraceSource": "4.0.0",
+          "System.Xml.XPath.XmlDocument": "4.0.1"
+        },
+        "runtime": {
+          "lib/netstandard1.3/Renci.SshNet.dll": {}
+        }
+      },
+      "sshnet.security.cryptography/1.2.0": {
+        "runtime": {
+          "lib/netstandard1.3/SshNet.Security.Cryptography.dll": {}
         }
       },
       "stackexchange.redis/1.2.0": {
@@ -26,6 +42,23 @@
         "runtime": {
           "lib/netstandard1.3/System.Collections.NonGeneric.dll": {}
         }
+      },
+      "system.diagnostics.tracesource/4.0.0": {
+        "runtimeTargets": {
+          "runtimes/unix/lib/netstandard1.3/System.Diagnostics.TraceSource.dll": {
+            "rid": "unix",
+            "assetType": "runtime"
+          },
+          "runtimes/win/lib/netstandard1.3/System.Diagnostics.TraceSource.dll": {
+            "rid": "win",
+            "assetType": "runtime"
+          }
+        }
+      },
+      "system.xml.xpath.xmldocument/4.0.1": {
+        "runtime": {
+          "lib/netstandard1.3/System.Xml.XPath.XmlDocument.dll": {}
+        }
       }
     }
   },
@@ -34,6 +67,20 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "ssh.net/2016.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ybkfE421hoGshrX/64/+sGhR+QjahJiNbsNzQAKLm+dp4j3CCNT48GKlJVh65IM5rmA9NxprwW8V0cQxOuI/cg==",
+      "path": "ssh.net/2016.0.0",
+      "hashPath": "ssh.net.2016.0.0.nupkg.sha512"
+    },
+    "sshnet.security.cryptography/1.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-EeFsirrrkIK+cdlYsxukNjBN98cbU7eHfTYZEwxsbOa3dvgR/OhOD06C0sTxvNPhe4UQ6yM0p1sKcT69jqgjTw==",
+      "path": "sshnet.security.cryptography/1.2.0",
+      "hashPath": "sshnet.security.cryptography.1.2.0.nupkg.sha512"
     },
     "stackexchange.redis/1.2.0": {
       "type": "package",
@@ -48,6 +95,20 @@
       "sha512": "sha512-QUQXovrCV7GiIX+sV31rUReS3GqIM7IPONxfWmrwHIQQNi41ZkhoFiWpYyhUn2b6BLDdpkiLzqGirzodbnjMWg==",
       "path": "system.collections.nongeneric/4.0.1",
       "hashPath": "system.collections.nongeneric.4.0.1.nupkg.sha512"
+    },
+    "system.diagnostics.tracesource/4.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-6WVCczFZKXwpWpzd/iJkYnsmWTSFFiU24Xx/YdHXBcu+nFI/ehTgeqdJQFbtRPzbrO3KtRNjvkhtj4t5/WwWsA==",
+      "path": "system.diagnostics.tracesource/4.0.0",
+      "hashPath": "system.diagnostics.tracesource.4.0.0.nupkg.sha512"
+    },
+    "system.xml.xpath.xmldocument/4.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Zm2BdeanuncYs3NhCj4c9e1x3EXFzFBVv2wPEc/Dj4ZbI9R8ecLSR5frAsx4zJCPBtKQreQ7Q/KxJEohJZbfzA==",
+      "path": "system.xml.xpath.xmldocument/4.0.1",
+      "hashPath": "system.xml.xpath.xmldocument.4.0.1.nupkg.sha512"
     }
   }
 }

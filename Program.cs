@@ -24,14 +24,11 @@ namespace discovery
             Scan.TCPScan(yop.getAllIPsInSubnet(), 9999);*/
             
             
-            Subnet LAN = new Subnet("192.168.1.0/24");
+            /*Subnet LAN = new Subnet("192.168.1.0/24");
             Stocker redis = new Stocker("127.0.0.1", 6379);
-            Discover disco = new Discover(Discover.CheckType.tcp, LAN, 6379, redis, "ZOB");
+            Discover disco = new Discover(Discover.CheckType.tcp, LAN, 6379, redis, "LAN");
+            disco.startDiscovery();*/
 
-            disco.startDiscovery();
-
-            /*testDiscover.stopDiscovery();
-            System.Threading.Thread.Sleep(5000);*/
         }
     }
 }
