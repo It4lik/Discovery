@@ -7177,7 +7177,9 @@
     ".NETCoreApp,Version=v1.1": [
       "Microsoft.NETCore.App >= 1.1.1",
       "StackExchange.Redis >= 1.2.0",
-      "System.Net.Sockets"
+      "System.Net.Sockets",
+      "System.Threading >= 4.3.0",
+      "System.Threading.Thread >= 4.3.0"
     ]
   },
   "packageFolders": {
@@ -7217,6 +7219,14 @@
           "System.Net.Sockets": {
             "target": "Package",
             "version": "*"
+          },
+          "System.Threading.Thread": {
+            "target": "Package",
+            "version": "4.3.0"
+          },
+          "System.Threading": {
+            "target": "Package",
+            "version": "4.3.0"
           }
         }
       }

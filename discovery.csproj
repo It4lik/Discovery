@@ -7,5 +7,7 @@
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis" Version="1.2.0"/>
     <PackageReference Include="System.Net.Sockets" Version="*"/>
+    <PackageReference Include="System.Threading.Thread" Version="4.3.0"/>
+    <PackageReference Include="System.Threading" Version="4.3.0"/>
   </ItemGroup>
 </Project>
