@@ -9,7 +9,9 @@ Give this app some arguments and it'll do the work :
 - action to do if a host is found (see *Actions*)
 - action to do if a host disappeared (see *Actions*)
 
-**I'll need a Redis endpoint to work !**
+**I'll need a Redis endpoint to work !** 
+- [redis.io](https://redis.io/) 
+- [Redis docker container](https://hub.docker.com/_/redis/)
 
 ## Checks
 - **Supported:**
