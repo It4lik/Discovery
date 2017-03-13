@@ -14,17 +14,19 @@ namespace discovery
 
             test.Write("yap", "666");
             Console.WriteLine(test.Read("yap"));*/
-            
 
-            Subnet yop = new Subnet("192.168.1.0/24");
-            Scan.TCPScan(yop.getAllIPsInSubnet(), 9999);
-
-            /*TcpClient yo = new TcpClient();
-            Console.WriteLine( yo.ConnectAsync("192.168.1.94", 8888).Wait(10000));*/
-
-                
             // Console.WriteLine(Check.TCPTestHost("192.168.1.94", 8888));
             //Check.CustomTest("192.168.1.94", 8788, "C:\\Windows\\System32\\bash.exe", "-c \"qls\"");
+
+            /*Subnet yop = new Subnet("192.168.1.0/24");
+            Scan.TCPScan(yop.getAllIPsInSubnet(), 9999);*/
+
+            Subnet yop = new Subnet("192.168.1.0/24");
+            Discover test = new Discover(Discover.CheckType.tcp, yop, "ZOB");
+            test.startDiscovery();
+            System.Threading.Thread.Sleep(50);
+            test.stopDiscovery();
+            System.Threading.Thread.Sleep(5000);
         }
     }
 }
