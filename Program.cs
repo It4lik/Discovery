@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using StackExchange.Redis;
+using System.Collections.Generic;
 
 namespace discovery
 {
@@ -20,15 +22,13 @@ namespace discovery
 
             /*Subnet yop = new Subnet("192.168.1.0/24");
             Scan.TCPScan(yop.getAllIPsInSubnet(), 9999);*/
+            
+            
+            Subnet LAN = new Subnet("192.168.1.0/24");
+            Stocker redis = new Stocker("127.0.0.1", 6379);
+            Discover disco = new Discover(Discover.CheckType.tcp, LAN, 6379, redis, "ZOB");
 
-            Stocker testRedis = new Stocker("192.168.1.94", 6379);
-            Subnet yop = new Subnet("192.168.1.0/24");
-
-
-            Discover testDiscover = new Discover(Discover.CheckType.tcp, yop, testRedis, "ZOB");
-
-            testDiscover.startDiscovery();
-            System.Threading.Thread.Sleep(50);
+            disco.startDiscovery();
 
             /*testDiscover.stopDiscovery();
             System.Threading.Thread.Sleep(5000);*/

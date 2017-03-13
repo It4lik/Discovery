@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+// Used to issue Redis connections
 using StackExchange.Redis;
 
 namespace discovery
@@ -11,7 +16,8 @@ namespace discovery
 
         private string _redisHost; // Redis instance IP address
         private ConnectionMultiplexer _redis; // Used to establish Redis connection 
-        private IDatabase _db; // IDatabase instance used to read/write in Redis' instance
+        private IDatabase _db; // IDatabase instance used to read/write in Redis' db instance (eg in a cluster)
+        private IServer _server; // IServer instance used to read/write in Redis' server instance (eg NOT in a cluster)
 
         public Stocker(string redisHost, int redisPort) {
             // The constructor is basically used to initialize Redis' connection
@@ -19,24 +25,41 @@ namespace discovery
             _redisHost = string.Concat(redisHost, ":", redisPort);
             _redis = ConnectionMultiplexer.Connect(_redisHost);
             _db = _redis.GetDatabase();
+            _server = _redis.GetServer(redisHost, redisPort);
         }
         
-        public string GetHost() {
+        public string GetRedisHost() {
             // Getter for the Redis' address
             return _redisHost;
         }
 
-        public void Write(string prefix, string host, string valueUp) {
+        public List<string> GetSubnetHosts(string prefix) {
+            List<string> currentHosts = new List<string>();
+            // searchedString will contain the prefix search in Redis : "Subnet_"
+            string searchedString = String.Concat(prefix, "_*");
+            // Add each key that matches the pattern "Subnet_" to currentHosts (return value)
+            foreach (var key in _server.Keys(pattern: searchedString)) {
+                currentHosts.Add(key.ToString().Split('_').Last());
+            }
+            return currentHosts;
+        }
+
+        public void Write(string prefix, string host) {
             // Insert a new host in Redis : new key/value : prefix_host:valueUp
-            RedisKey rKey = string.Concat(prefix, "_", host);
-            RedisValue rValue = valueUp;
-            _db.StringSet(rKey, rValue);
+            RedisKey hostUp = string.Concat(prefix, "_", host);
+            _db.StringSet(hostUp, "UP");
         }
 
         public string Read(string prefix, string host) {
             // Try to read an host in Redis : prefix_host is read
             RedisKey rKey = string.Concat(prefix, "_", host);
             return _db.StringGet(rKey);
+        }
+
+        public void markHostDown(string prefix, string host) {
+            // Mark a host as down : prefix_host:
+            string hostDown = String.Concat(prefix, "_", host);
+            _db.StringSet(hostDown, "DOWN");
         }
 
         public bool doesKeyExist(string prefix, string host) {

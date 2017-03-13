@@ -21,6 +21,7 @@ namespace discovery
             // Initalize object properties
             _checkType = checkType;
             _targetedSubnet = targetedSubnet;
+            _targetedPort = port;
             _redis = redis;
             _discoveryName = discoveryName;
             _cts = new CancellationTokenSource();
@@ -69,12 +70,15 @@ namespace discovery
         private void discoveryTcp(CancellationToken cancelToken) {
             // thread that open TCP connections
 
-            //  ####  TEMP CODE  ####  //
+            List<string> aliveHosts = new List<string>();
+            List<string> existingHosts = new List<string>();
 
             //while (true) {
             for (int i = 0; i < 2; i++) {
                 // Used to store aliveHosts detected by check
-                List<string> aliveHosts = new List<string>();
+                aliveHosts = Scan.TCPScan(_targetedSubnet.getAllIPsInSubnet(), _targetedPort);
+                existingHosts =  _redis.GetSubnetHosts(_discoveryName);
+                
 
                 if(cancelToken.IsCancellationRequested) {
                     // If stopDiscovery() was called. That means that someone wants to stop the discovery, and thus, this thread. 
@@ -82,19 +86,35 @@ namespace discovery
                     Console.WriteLine("DEBUG: Cancel method called on {0} thread. Cancellation requested.", _discoveryName); // Debug console output
                     return;
                 }
-                // Get the list of alive hosts
-                aliveHosts = Scan.TCPScan(_targetedSubnet.getAllIPsInSubnet(), _targetedPort);
 
-                // Work on current alive hosts
-                foreach (string currentHost in aliveHosts) {
-                    if ( ! _redis.doesKeyExist(_discoveryName, currentHost)) {
-                        Console.WriteLine("{0}: Host {1} was not in Redis. Adding it.", _discoveryName, currentHost); // Debug console output
-                        _redis.Write(_discoveryName, currentHost, "UP");
-                    }
-                    else {
-                        Console.WriteLine("{0}: Host {1} was already in Redis :)", _discoveryName, currentHost); // Debug console output
+
+                foreach (string test in aliveHosts) {
+                    Console.WriteLine(aliveHosts.Contains(test));
+                }
+
+                // Delete host in redis if it's not alive
+                foreach (string existingHost in existingHosts) {
+                    Console.WriteLine("currenthost {0} in aliveHost", existingHost);
+                    if ( (! aliveHosts.Contains(existingHost)) && (_redis.Read(_discoveryName, existingHost) == "UP") ) {
+                        Console.WriteLine("DEBUG: Deleting {0} which is not alive.", existingHost); // Debug console output
+                        _redis.markHostDown(_discoveryName, existingHost);
                     }
                 }
+
+
+                // Work on current alive hosts :
+                //  - print found host in console
+                //  - add found host in Redis if not exists
+                foreach (string aliveHost in aliveHosts) {
+                    if ( ! _redis.doesKeyExist(_discoveryName, aliveHost)) {
+                        Console.WriteLine("{0}: Host {1} was not in Redis. Adding it.", _discoveryName, aliveHost); // Debug console output
+                        _redis.Write(_discoveryName, aliveHost);
+                    }
+                    else {
+                        Console.WriteLine("{0}: Host {1} was already in Redis :) Le read : {2}", _discoveryName, aliveHost, _redis.Read(_discoveryName, aliveHost)); // Debug console output
+                    }
+                }
+
             // BELOW is wanted logic
 
                 // vocab : "alive host" : currently alive hosts seen by TCPScan
