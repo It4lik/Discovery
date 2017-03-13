@@ -21,12 +21,17 @@ namespace discovery
             /*Subnet yop = new Subnet("192.168.1.0/24");
             Scan.TCPScan(yop.getAllIPsInSubnet(), 9999);*/
 
+            Stocker testRedis = new Stocker("192.168.1.94", 6379);
             Subnet yop = new Subnet("192.168.1.0/24");
-            Discover test = new Discover(Discover.CheckType.tcp, yop, "ZOB");
-            test.startDiscovery();
+
+
+            Discover testDiscover = new Discover(Discover.CheckType.tcp, yop, testRedis, "ZOB");
+
+            testDiscover.startDiscovery();
             System.Threading.Thread.Sleep(50);
-            test.stopDiscovery();
-            System.Threading.Thread.Sleep(5000);
+
+            /*testDiscover.stopDiscovery();
+            System.Threading.Thread.Sleep(5000);*/
         }
     }
 }

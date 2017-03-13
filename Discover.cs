@@ -14,12 +14,14 @@ namespace discovery
         private CancellationTokenSource _cts; // CancellationTokenSource used to properly stop threads (eg checks).
         private CheckType _checkType; // Check to use on subnet's hosts.
         private Subnet _targetedSubnet; // Subnet on which issue checks. 
+        private int _targetedPort; // Targeted port of hosts.
         private Stocker _redis; // Holds the current redis connection.
         private string _discoveryName; // Arbitrary name.
-        public Discover(CheckType checkType, Subnet targetedSubnet, string discoveryName) {
+        public Discover(CheckType checkType, Subnet targetedSubnet, int port, Stocker redis, string discoveryName) {
             // Initalize object properties
             _checkType = checkType;
             _targetedSubnet = targetedSubnet;
+            _redis = redis;
             _discoveryName = discoveryName;
             _cts = new CancellationTokenSource();
             // Initialize the _discovery thread with targeted check and subnet (checkType, targetedSubnet)
@@ -44,7 +46,7 @@ namespace discovery
                 case CheckType.tcp:
                     // Instanciate the thread with discoveryTcp method.
                     _discovery = new Thread(delegate() {
-                        discoveryTcp(_targetedSubnet, _cts.Token);
+                        discoveryTcp(_cts.Token);
                     });
                     Console.WriteLine("DEBUG: Thread {0} initialized.", _discoveryName); // Debug console output
 
@@ -53,7 +55,7 @@ namespace discovery
                 default:
                     // Default is TCP check. See case CheckType.tcp:
                     _discovery = new Thread(delegate() {
-                        discoveryTcp(_targetedSubnet, _cts.Token);
+                        discoveryTcp(_cts.Token);
                     });
                     
                     break;
@@ -64,7 +66,7 @@ namespace discovery
             // thread that issue shell commands
         }
 
-        private void discoveryTcp(Subnet targetedSubnet, CancellationToken cancelToken) {
+        private void discoveryTcp(CancellationToken cancelToken) {
             // thread that open TCP connections
 
             //  ####  TEMP CODE  ####  //
@@ -80,8 +82,19 @@ namespace discovery
                     Console.WriteLine("DEBUG: Cancel method called on {0} thread. Cancellation requested.", _discoveryName); // Debug console output
                     return;
                 }
-                aliveHosts = Scan.TCPScan(_targetedSubnet.getAllIPsInSubnet(), 443);
+                // Get the list of alive hosts
+                aliveHosts = Scan.TCPScan(_targetedSubnet.getAllIPsInSubnet(), _targetedPort);
 
+                // Work on current alive hosts
+                foreach (string currentHost in aliveHosts) {
+                    if ( ! _redis.doesKeyExist(_discoveryName, currentHost)) {
+                        Console.WriteLine("{0}: Host {1} was not in Redis. Adding it.", _discoveryName, currentHost); // Debug console output
+                        _redis.Write(_discoveryName, currentHost, "UP");
+                    }
+                    else {
+                        Console.WriteLine("{0}: Host {1} was already in Redis :)", _discoveryName, currentHost); // Debug console output
+                    }
+                }
             // BELOW is wanted logic
 
                 // vocab : "alive host" : currently alive hosts seen by TCPScan
@@ -95,7 +108,8 @@ namespace discovery
                 // if a host in that list is NOT in the string list of alive hosts : delete it from redis 
 
             }
-            Console.WriteLine("DEBUG: Out of loop in {0} thread.", _discoveryName); // Debug console output
+            Console.WriteLine("DEBUG: Out of loop in {0} thread. Self-destructin.", _discoveryName); // Debug console output
+            return;
         }
     }
 }
