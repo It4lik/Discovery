@@ -19,6 +19,7 @@ namespace discovery
                         new PasswordAuthenticationMethod(username, password)
                     }
                 );
+                _actionType = actionType;
                 _SSHCommand = SSHCommand;
                 _host = host;
                 _port = port;
