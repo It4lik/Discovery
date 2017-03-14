@@ -1,0 +1,48 @@
+version: '2'  
+services:  
+  redis:
+    image: redis
+    ports: 
+      - "6379:6379"
+    hostname: redis.disco 
+    networks:
+      disco_net:
+        ipv4_address: 177.177.1.10
+        aliases:
+          - redis
+          - redis.disco
+
+  sshserver:
+    build:
+      context: ./Dockerfiles/sshserver
+      dockerfile: Dockerfile
+    ports:
+      - "2222:2222"
+    image: sshserver
+    hostname: sshserver.disco
+    networks:
+      disco_net:
+        ipv4_address: 177.177.1.21
+        aliases:
+          - sshserver
+          - sshserver.disco
+
+  disco:
+    build:
+      context: ./Dockerfiles/disco
+      dockerfile: Dockerfile
+    image: disco
+    hostname: disco.disco
+    networks:
+      disco_net:
+        ipv4_address: 177.177.1.31
+        aliases:
+          - disco
+          - disco.disco
+
+networks:
+  disco_net:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 177.177.1.0/24
