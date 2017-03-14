@@ -14,3 +14,11 @@ C:/Users/It4/Documents/Work/Gits/Discovery/Discovery/obj/Debug/netcoreapp1.1/dis
 /app/obj/Debug/netcoreapp1.1/discovery.AssemblyInfo.cs
 /app/obj/Debug/netcoreapp1.1/discovery.dll
 /app/obj/Debug/netcoreapp1.1/discovery.pdb
+/home/it4/Documents/cours/dotnet/Discovery/bin/Debug/netcoreapp1.1/discovery.deps.json
+/home/it4/Documents/cours/dotnet/Discovery/bin/Debug/netcoreapp1.1/discovery.runtimeconfig.json
+/home/it4/Documents/cours/dotnet/Discovery/bin/Debug/netcoreapp1.1/discovery.runtimeconfig.dev.json
+/home/it4/Documents/cours/dotnet/Discovery/bin/Debug/netcoreapp1.1/discovery.dll
+/home/it4/Documents/cours/dotnet/Discovery/bin/Debug/netcoreapp1.1/discovery.pdb
+/home/it4/Documents/cours/dotnet/Discovery/obj/Debug/netcoreapp1.1/discovery.AssemblyInfo.cs
+/home/it4/Documents/cours/dotnet/Discovery/obj/Debug/netcoreapp1.1/discovery.dll
+/home/it4/Documents/cours/dotnet/Discovery/obj/Debug/netcoreapp1.1/discovery.pdb

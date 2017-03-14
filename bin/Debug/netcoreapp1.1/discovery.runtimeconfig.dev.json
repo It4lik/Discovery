@@ -1,7 +1,7 @@
 {
   "runtimeOptions": {
     "additionalProbingPaths": [
-      "/root/.nuget/packages"
+      "/home/it4/.nuget/packages"
     ]
   }
 }

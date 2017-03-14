@@ -59,19 +59,19 @@ namespace discovery
             _db.StringSet(hostUp, "UP");
         }
 
-        public string Read(string prefix, string host) {
+        public string ReadHost(string prefix, string host) {
             // Try to read an host in Redis : prefix_host is read
             RedisKey rKey = string.Concat(prefix, "_", host);
             return _db.StringGet(rKey);
         }
 
-        public void markHostDown(string prefix, string host) {
+        public void MarkHostDown(string prefix, string host) {
             // Mark a host as down : prefix_host:
             string hostDown = String.Concat(prefix, "_", host);
             _db.StringSet(hostDown, "DOWN");
         }
 
-        public bool doesKeyExist(string prefix, string host) {
+        public bool DoesKeyExist(string prefix, string host) {
             // Tell if a host exists in Redis : prefix_host is searched
             RedisKey rKey = string.Concat(prefix, "_", host);
             return _db.KeyExists(string.Concat(prefix, "_", host));

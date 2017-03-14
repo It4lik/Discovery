@@ -97,7 +97,7 @@ namespace discovery
         }
       
         public static List<string> TCPScan(List<string> targetedIPs, int targetedPort) {
-            // Total number of scanned hosts (253 for a /24 subnet)
+            // Total number of scanned hosts (254 for a /24 subnet)
             int totalScannedHosts = 0; 
             // Total number of alive host (eg TCP check succeeded)
             int aliveHostsNumber = 0;

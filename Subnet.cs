@@ -26,6 +26,10 @@ namespace discovery
                 // Set _firstFreeIP, _lastFreeIP and _broadcastIP properties
                 this.setAllUsefulIPs(_networkIP, _maskCIDR);
             }
+            else {
+                Console.WriteLine("FATAL: This subnet is not a CIDR-formatted IPv4 subnet. Like '192.168.1.0/24'. Exiting.");
+                System.Environment.Exit(5);
+            }
         }
 
         private string setNetmask(string netIP, int maskCIDR) {
@@ -43,7 +47,7 @@ namespace discovery
         }
 
         private string setNetworkIP(int netmask, string ipAddress) {
-            string binIpAddress = decimalIPtoBinIP(ipAddress);
+            string binIpAddress = DecimalIPtoBinIP(ipAddress);
             string networkBinIpAddress = string.Empty;
             for (int i = 0; i < netmask; i++)
             {
@@ -53,12 +57,12 @@ namespace discovery
             {
                 networkBinIpAddress = String.Concat(networkBinIpAddress, '0');
             }
-            return binIPtoDecimalIP(binIPtoBinIPWithDots(networkBinIpAddress));
+            return BinIPtoDecimalIP(BinIPtoBinIPWithDots(networkBinIpAddress));
         }
 
         private void setAllUsefulIPs(string networkIP, int maskCIDR) {
             // get first free address, last free address and the broadcast address
-            string networkBinIP = decimalIPtoBinIP(networkIP);
+            string networkBinIP = DecimalIPtoBinIP(networkIP);
             char[] tempFirstIPChar = networkBinIP.ToCharArray(0, 32);
             char[] tempLastIPChar = networkBinIP.ToCharArray(0, 32);
 
@@ -69,17 +73,17 @@ namespace discovery
             }
             // Get first free IP : firt IP after subnet's IP
             tempFirstIPChar[31] = '1';
-            _firstFreeIP = binIPtoBinIPWithDots(new string(tempFirstIPChar));
+            _firstFreeIP = BinIPtoBinIPWithDots(new string(tempFirstIPChar));
             // Get last free IP : last free IP before broadcast address
             tempLastIPChar[31] = '0';
-            _lastFreeIP = binIPtoBinIPWithDots(new string(tempLastIPChar));
+            _lastFreeIP = BinIPtoBinIPWithDots(new string(tempLastIPChar));
             // et broadcast address : last address of subnet
             tempLastIPChar[31] = '1';
-            _broadcastIP = binIPtoBinIPWithDots(new string(tempLastIPChar));
+            _broadcastIP = BinIPtoBinIPWithDots(new string(tempLastIPChar));
         }
         private void setUsefulIP(string networkIP, int maskCIDR, UsefulIPs wantedIPType) {
             // Used to get firstFree, lastFree or broadcast address from subnet address
-            string networkBinIP = decimalIPtoBinIP(networkIP);
+            string networkBinIP = DecimalIPtoBinIP(networkIP);
             char[] tempFirstIPChar = networkBinIP.ToCharArray(0, 32);
             char[] tempLastIPChar = networkBinIP.ToCharArray(0, 32);
 
@@ -94,17 +98,17 @@ namespace discovery
                 case UsefulIPs.broadcast:
                     // broadcast address : last address of subnet
                    tempLastIPChar[31] = '1';
-                   _broadcastIP = binIPtoBinIPWithDots(new string(tempLastIPChar));
+                   _broadcastIP = BinIPtoBinIPWithDots(new string(tempLastIPChar));
                    break;
                 case UsefulIPs.firstFree:
                     // Get first free IP : firt IP after subnet's IP
                     tempFirstIPChar[31] = '1';
-                    _firstFreeIP = binIPtoBinIPWithDots(new string(tempFirstIPChar));
+                    _firstFreeIP = BinIPtoBinIPWithDots(new string(tempFirstIPChar));
                    break;
                 case UsefulIPs.lastFree:
                     // Get last free IP : last free IP before broadcast address
                     tempLastIPChar[31] = '0';
-                    _lastFreeIP = binIPtoBinIPWithDots(new string(tempLastIPChar));
+                    _lastFreeIP = BinIPtoBinIPWithDots(new string(tempLastIPChar));
                    break;
                 default:
                     break;
@@ -119,12 +123,12 @@ namespace discovery
             // Iterate on all IPs = start from the first, increment, till the currentBinIP does not treach tha last IP, eg the endBinIP (often the broadcast address of a subnet)
             while (currentBinIP != endBinIP) {
                 // Add current IP to the IPs list
-                IPs.Add(binIPtoDecimalIP(currentBinIP));
+                IPs.Add(BinIPtoDecimalIP(currentBinIP));
 
                 // Console.WriteLine(binIPtoDecimalIP(currentBinIP)); // Debug console output
 
                 // Increment current IP
-                currentBinIP = incrementIP(currentBinIP);
+                currentBinIP = IncrementIP(currentBinIP);
             }
             return IPs;
         }

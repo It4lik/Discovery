@@ -19,39 +19,39 @@ namespace discovery
         private HostAction _actionIfUp; // Holds the action to do when finding a host
         private HostAction _actionIfDown; // Holds the action to do when a host disapppeared
         private string _discoveryName; // Arbitrary name.
-        public Discover(CheckType checkType, Subnet targetedSubnet, int port, HostAction actionIfUp, HostAction actionIfDown, Stocker redis, string discoveryName) {
+        public Discover(string discoveryName, CheckType checkType, Subnet targetedSubnet, int port, HostAction actionIfUp, HostAction actionIfDown, Stocker redis) {
             // Initalize object properties
+            _discoveryName = discoveryName;
             _checkType = checkType;
             _targetedSubnet = targetedSubnet;
             _targetedPort = port;
             _redis = redis;
             _actionIfUp = actionIfUp;
             _actionIfDown = actionIfDown;
-            _discoveryName = discoveryName;
             _cts = new CancellationTokenSource();
             // Initialize the _discovery thread with targeted check and subnet (checkType, targetedSubnet)
-            initializeDiscoveryThread();
+            InitializeDiscoveryThread();
         }
 
-        public void startDiscovery() {
+        public void StartDiscovery() {
             // Used to start the thread that issue scans
             _discovery.Start();
             Console.WriteLine("DEBUG: Thread {0} started.", _discoveryName); // Debug console output
         }
 
-        public void stopDiscovery() {
+        public void StopDiscovery() {
             // Used to stop the thread tha issue scans (and cleanup afterwards)
             Console.WriteLine("DEBUG: STOP CATCHED ! Aborting {0} thread.", _discoveryName); // Debug console output
             _cts.Cancel();
             Console.WriteLine("DEBUG: Thread {0} aborted.", _discoveryName); // Debug console output
         }
-        private void initializeDiscoveryThread() {
+        private void InitializeDiscoveryThread() {
             switch (_checkType) {
                 // _cts.Token is always sent : it is used to stop threads
                 case CheckType.tcp:
                     // Instanciate the thread with discoveryTcp method.
                     _discovery = new Thread(delegate() {
-                        discoveryTcp(_cts.Token);
+                        DiscoveryTcp(_cts.Token);
                     });
                     Console.WriteLine("DEBUG: Thread {0} initialized.", _discoveryName); // Debug console output
 
@@ -60,18 +60,18 @@ namespace discovery
                 default:
                     // Default is TCP check. See case CheckType.tcp:
                     _discovery = new Thread(delegate() {
-                        discoveryTcp(_cts.Token);
+                        DiscoveryTcp(_cts.Token);
                     });
                     
                     break;
             }
         }
         
-        private void discoveryCustom(string command) {
+        private void DiscoveryCustom(string command) {
             // thread that issue shell commands
         }
 
-        private void discoveryTcp(CancellationToken cancelToken) {
+        private void DiscoveryTcp(CancellationToken cancelToken) {
             // thread that open TCP connections
 
             List<string> aliveHosts = new List<string>();
@@ -99,10 +99,10 @@ namespace discovery
                 */
                 foreach (string existingHost in existingHosts) {
                     // If the host is in redis as "UP", but not in current alive hosts list
-                    if ( (! aliveHosts.Contains(existingHost)) && (_redis.Read(_discoveryName, existingHost) == "UP") ) {
+                    if ( (! aliveHosts.Contains(existingHost)) && (_redis.ReadHost(_discoveryName, existingHost) == "UP") ) {
                         Console.WriteLine("{0}: Deleting {1} which is not alive.", _discoveryName, existingHost); // Debug console output
                         // Mark the host as down in redis
-                        _redis.markHostDown(_discoveryName, existingHost);
+                        _redis.MarkHostDown(_discoveryName, existingHost);
                         // Execute action _actionIfDown
                         _actionIfDown.Execute(existingHost);
                     }
@@ -116,7 +116,7 @@ namespace discovery
                 */
                 foreach (string aliveHost in aliveHosts) {
                     // If the host is alive and doesn't exist in redis or marked as DOWN
-                    if ( (! _redis.doesKeyExist(_discoveryName, aliveHost)) || (_redis.Read(_discoveryName, aliveHost) == "DOWN")) {
+                    if ( (! _redis.DoesKeyExist(_discoveryName, aliveHost)) || (_redis.ReadHost(_discoveryName, aliveHost) == "DOWN")) {
                         Console.WriteLine("{0}: Host {1} was not in Redis. Adding it.", _discoveryName, aliveHost); // Debug console output
                         // Mark the host as UP in redis
                         _redis.Write(_discoveryName, aliveHost);
@@ -124,7 +124,7 @@ namespace discovery
                         _actionIfUp.Execute(aliveHost);
                     }
                     else {
-                        Console.WriteLine("{0}: Host {1} was already in Redis ! Value : {2}", _discoveryName, aliveHost, _redis.Read(_discoveryName, aliveHost)); // Debug console output
+                        Console.WriteLine("{0}: Host {1} was already in Redis ! Value : {2}", _discoveryName, aliveHost, _redis.ReadHost(_discoveryName, aliveHost)); // Debug console output
                     }
                 }
             }

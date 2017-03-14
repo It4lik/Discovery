@@ -17,7 +17,7 @@ services:
       context: ./Dockerfiles/sshserver
       dockerfile: Dockerfile
     ports:
-      - "2222:2222"
+      - "4444:22"
     image: sshserver
     hostname: sshserver.disco
     networks:
@@ -28,10 +28,7 @@ services:
           - sshserver.disco
 
   disco:
-    build:
-      context: ./Dockerfiles/disco
-      dockerfile: Dockerfile
-    image: disco
+    image: app
     hostname: disco.disco
     networks:
       disco_net:
@@ -39,6 +36,7 @@ services:
         aliases:
           - disco
           - disco.disco
+    entrypoint: "sleep 999999999"
 
 networks:
   disco_net:
