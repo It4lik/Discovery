@@ -28,6 +28,9 @@ services:
           - sshserver.disco
 
   disco:
+    build:
+      context: ./Dockerfiles/disco
+      dockerfile: Dockerfile
     image: app
     hostname: disco.disco
     networks:
