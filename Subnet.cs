@@ -7,16 +7,16 @@ namespace discovery
     public class Subnet : IPv4Address
     {
         // Class used to make IPv4 operations
-        // This is gonna be exploded into an interface and a "Subnet" class that we can instantiate with one subnet (CIDR format) 
+        // This is gonna be exploded into an interface and a "Subnet" class that we can instantiate with one subnet (CIDR format)
         private enum UsefulIPs {broadcast, firstFree, lastFree, network};
         private  string _networkIP; // Only subnet address. Ex : "192.168.1.0"
         private int _maskCIDR; // Only mask, CIDR format. Ex : 24
         private string _netmask; // Only mask, binary format, NO DOTS, 32 chars. Ex : "11111111111111111100000000000000"
-        private string _firstFreeIP; // First free IP address in subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.0000001". 
+        private string _firstFreeIP; // First free IP address in subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.0000001".
         private string _lastFreeIP; // Last free IP address in subnet, binary, WITH DOTS, ends with 0. Ex : "11010111.11010011.11011000.11111110".
         private string _broadcastIP; // Last IP address of subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.11111111".
 
-        
+
         public Subnet(string _CIDRAddress) {
             // Verify that address is correctly formatted
             if (this.verifyAddressCIDR(_CIDRAddress)) {
@@ -134,7 +134,7 @@ namespace discovery
         }
         private bool verifyAddressCIDR(string CIDRAddress) {
             // Used to verify that a string is a subnet IPv4 address formatted in CIDR (as in "192.168.1.0/24)
-            Regex CIDRRegex = new Regex(@"^(([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/(([1-9])|([12][0-9])|(3[0-2]))$");
+            Regex CIDRRegex = new Regex(@"^(([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){2}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/(([1-9])|([12][0-9])|(3[0-2]))$");
             return CIDRRegex.IsMatch(CIDRAddress);
         }
     }
