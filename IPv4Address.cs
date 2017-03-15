@@ -51,7 +51,7 @@ namespace discovery
             // Argument must be an address binary formatted with dots as 00010001.10110110.00101011.00110101
             string[] splittedIP = ipToInc.Split('.');
             // For each byte
-            for (var i = 3 ; i >= 0 ; i--){
+            for (var i = 3 ; i >= 0 ; i--) {
                 // This byte has reached max value
                 if(splittedIP[i] == "11111111") { 
                     // This is the bigger byte
@@ -64,8 +64,7 @@ namespace discovery
                         continue;
                     }
                 }
-                else
-                {
+                else {
                     // Inc current byte
                     splittedIP[i] = BinaryTools.decimalToBin(Convert.ToInt32(BinaryTools.binToDecimal(splittedIP[i])) +1 );
                     break;

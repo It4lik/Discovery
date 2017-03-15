@@ -53,22 +53,20 @@ namespace discovery
             return currentHosts;
         }
 
-        public void Write(string prefix, string host) {
-            // Insert a new host in Redis : new key/value : prefix_host:valueUp
+        public void markHostUp(string prefix, string host) {
+            // Insert (or edit) a host in Redis : new key/value : prefix_host:valueUp
             RedisKey hostUp = string.Concat(prefix, "_", host);
             _db.StringSet(hostUp, "UP");
         }
-
-        public string Read(string prefix, string host) {
-            // Try to read an host in Redis : prefix_host is read
-            RedisKey rKey = string.Concat(prefix, "_", host);
-            return _db.StringGet(rKey);
-        }
-
         public void markHostDown(string prefix, string host) {
             // Mark a host as down : prefix_host:
             string hostDown = String.Concat(prefix, "_", host);
             _db.StringSet(hostDown, "DOWN");
+        }
+        public string Read(string prefix, string host) {
+            // Try to read an host in Redis : prefix_host is read
+            RedisKey rKey = string.Concat(prefix, "_", host);
+            return _db.StringGet(rKey);
         }
 
         public bool doesKeyExist(string prefix, string host) {
