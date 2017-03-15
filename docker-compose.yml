@@ -28,11 +28,10 @@ services:
           - sshserver.disco
 
   disco:
-    build:
-      context: ./Dockerfiles/disco
-      dockerfile: Dockerfile
-    image: app
+    image: microsoft/dotnet
     hostname: disco.disco
+    volumes:
+      - ./:/app
     networks:
       disco_net:
         ipv4_address: 177.177.1.31
