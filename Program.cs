@@ -11,7 +11,7 @@ namespace discovery
         static void Main(string[] args)
         {                
             // Subnet on which do the tests
-            Subnet LAN = new Subnet("172.17.0.0/24");
+            Subnet LAN = new Subnet("172.177.1.0/24");
             // Redis connection to use
             Stocker redis = new Stocker("177.177.1.10", 6379);
             // Action to do if a host is up
