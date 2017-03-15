@@ -7,16 +7,16 @@ namespace discovery
     public class Subnet : IPv4Address
     {
         // Class used to make IPv4 operations
-        // This is gonna be exploded into an interface and a "Subnet" class that we can instantiate with one subnet (CIDR format) 
+        // This is gonna be exploded into an interface and a "Subnet" class that we can instantiate with one subnet (CIDR format)
         private enum UsefulIPs {broadcast, firstFree, lastFree, network};
         private  string _networkIP; // Only subnet address. Ex : "192.168.1.0"
         private int _maskCIDR; // Only mask, CIDR format. Ex : 24
         private string _netmask; // Only mask, binary format, NO DOTS, 32 chars. Ex : "11111111111111111100000000000000"
-        private string _firstFreeIP; // First free IP address in subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.0000001". 
+        private string _firstFreeIP; // First free IP address in subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.0000001".
         private string _lastFreeIP; // Last free IP address in subnet, binary, WITH DOTS, ends with 0. Ex : "11010111.11010011.11011000.11111110".
         private string _broadcastIP; // Last IP address of subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.11111111".
 
-        
+
         public Subnet(string _CIDRAddress) {
             // Verify that address is correctly formatted
             if (this.verifyAddressCIDR(_CIDRAddress)) {
@@ -25,6 +25,10 @@ namespace discovery
                 _netmask = this.setNetmask(_networkIP, _maskCIDR);
                 // Set _firstFreeIP, _lastFreeIP and _broadcastIP properties
                 this.setAllUsefulIPs(_networkIP, _maskCIDR);
+            }
+            else {
+                Console.WriteLine("FATAL: This subnet is not a CIDR-formatted IPv4 subnet. Like '192.168.1.0/24'. Exiting.");
+                System.Environment.Exit(5);
             }
         }
 
@@ -43,7 +47,7 @@ namespace discovery
         }
 
         private string setNetworkIP(int netmask, string ipAddress) {
-            string binIpAddress = decimalIPtoBinIP(ipAddress);
+            string binIpAddress = DecimalIPtoBinIP(ipAddress);
             string networkBinIpAddress = string.Empty;
             for (int i = 0; i < netmask; i++)
             {
@@ -53,12 +57,12 @@ namespace discovery
             {
                 networkBinIpAddress = String.Concat(networkBinIpAddress, '0');
             }
-            return binIPtoDecimalIP(binIPtoBinIPWithDots(networkBinIpAddress));
+            return BinIPtoDecimalIP(BinIPtoBinIPWithDots(networkBinIpAddress));
         }
 
         private void setAllUsefulIPs(string networkIP, int maskCIDR) {
             // get first free address, last free address and the broadcast address
-            string networkBinIP = decimalIPtoBinIP(networkIP);
+            string networkBinIP = DecimalIPtoBinIP(networkIP);
             char[] tempFirstIPChar = networkBinIP.ToCharArray(0, 32);
             char[] tempLastIPChar = networkBinIP.ToCharArray(0, 32);
 
@@ -69,17 +73,17 @@ namespace discovery
             }
             // Get first free IP : firt IP after subnet's IP
             tempFirstIPChar[31] = '1';
-            _firstFreeIP = binIPtoBinIPWithDots(new string(tempFirstIPChar));
+            _firstFreeIP = BinIPtoBinIPWithDots(new string(tempFirstIPChar));
             // Get last free IP : last free IP before broadcast address
             tempLastIPChar[31] = '0';
-            _lastFreeIP = binIPtoBinIPWithDots(new string(tempLastIPChar));
+            _lastFreeIP = BinIPtoBinIPWithDots(new string(tempLastIPChar));
             // et broadcast address : last address of subnet
             tempLastIPChar[31] = '1';
-            _broadcastIP = binIPtoBinIPWithDots(new string(tempLastIPChar));
+            _broadcastIP = BinIPtoBinIPWithDots(new string(tempLastIPChar));
         }
         private void setUsefulIP(string networkIP, int maskCIDR, UsefulIPs wantedIPType) {
             // Used to get firstFree, lastFree or broadcast address from subnet address
-            string networkBinIP = decimalIPtoBinIP(networkIP);
+            string networkBinIP = DecimalIPtoBinIP(networkIP);
             char[] tempFirstIPChar = networkBinIP.ToCharArray(0, 32);
             char[] tempLastIPChar = networkBinIP.ToCharArray(0, 32);
 
@@ -94,17 +98,17 @@ namespace discovery
                 case UsefulIPs.broadcast:
                     // broadcast address : last address of subnet
                    tempLastIPChar[31] = '1';
-                   _broadcastIP = binIPtoBinIPWithDots(new string(tempLastIPChar));
+                   _broadcastIP = BinIPtoBinIPWithDots(new string(tempLastIPChar));
                    break;
                 case UsefulIPs.firstFree:
                     // Get first free IP : firt IP after subnet's IP
                     tempFirstIPChar[31] = '1';
-                    _firstFreeIP = binIPtoBinIPWithDots(new string(tempFirstIPChar));
+                    _firstFreeIP = BinIPtoBinIPWithDots(new string(tempFirstIPChar));
                    break;
                 case UsefulIPs.lastFree:
                     // Get last free IP : last free IP before broadcast address
                     tempLastIPChar[31] = '0';
-                    _lastFreeIP = binIPtoBinIPWithDots(new string(tempLastIPChar));
+                    _lastFreeIP = BinIPtoBinIPWithDots(new string(tempLastIPChar));
                    break;
                 default:
                     break;
@@ -119,18 +123,18 @@ namespace discovery
             // Iterate on all IPs = start from the first, increment, till the currentBinIP does not treach tha last IP, eg the endBinIP (often the broadcast address of a subnet)
             while (currentBinIP != endBinIP) {
                 // Add current IP to the IPs list
-                IPs.Add(binIPtoDecimalIP(currentBinIP));
+                IPs.Add(BinIPtoDecimalIP(currentBinIP));
 
                 // Console.WriteLine(binIPtoDecimalIP(currentBinIP)); // Debug console output
 
                 // Increment current IP
-                currentBinIP = incrementIP(currentBinIP);
+                currentBinIP = IncrementIP(currentBinIP);
             }
             return IPs;
         }
         private bool verifyAddressCIDR(string CIDRAddress) {
             // Used to verify that a string is a subnet IPv4 address formatted in CIDR (as in "192.168.1.0/24)
-            Regex CIDRRegex = new Regex(@"^(([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/(([1-9])|([12][0-9])|(3[0-2]))$");
+            Regex CIDRRegex = new Regex(@"^(([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){2}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/(([1-9])|([12][0-9])|(3[0-2]))$");
             return CIDRRegex.IsMatch(CIDRAddress);
         }
     }
