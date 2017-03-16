@@ -62,7 +62,7 @@ You'll find a docker-compose.yml at the root of the repo. It will launch three c
 - sshserver : simple alpine container. Provide a SSH endpoint. A passwordless UNIX user "john" is already created for test purposes.
 - dotnet : is using official microsoft/dotnet image (latest build atm). The application is mounted as a volume in /app.
 
-```{r, engine='bash', count_lines}
+```shell
 # Run the test docker-compose
 $ docker-compose up -d
 
@@ -78,7 +78,7 @@ root@disco:/# cd /app
 root@disco:/app# dotnet restore
 # Wait for the restore to complete... (this will not take long)
 
-# Run the app. FOr test purposes, the discovery run only once. (not using a while (true {} block in the Thread definition))
+# Run the app. For test purposes, the discovery run only once. (not using a while (true {} block in the Thread definition))
 root@disco:/# dotnet run
 
 # Go back in you SSH session on sshserver
