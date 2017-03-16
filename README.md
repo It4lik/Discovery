@@ -85,7 +85,7 @@ root@disco:/# dotnet run
 sshserver:~$ ls
 sshserver:~$ cat logfile
 
-# You can try to add/remove hosts. Default parameters are scaning hosts on port 6379. You can spin-up additional Redis hosts (Redis is by default on port 6379) with the following command :
+# You can try to add/remove hosts. Default parameters are scaning hosts on port 6379. You can spin-up additional Redis hosts (Redis is listening by default on port 6379) with the following command :
 # Do not forget --network to add them in the same network as the docker-compose containers.
 $ docker run -d --network discovery_disco_net redis
 ```
