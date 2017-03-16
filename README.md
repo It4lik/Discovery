@@ -58,9 +58,9 @@ disco.startDiscovery();
 
 You need to checkout on docker_tests branch for this to work.
 You'll find a docker-compose.yml at the root of the repo. It will launch three containers : 
-- redis : store hosts data
-- sshserver : simple alpine container. Provide a SSH endpoint. A passwordless UNIX user "john" is already created for test purposes.
-- dotnet : is using official microsoft/dotnet image (latest build atm). The application is mounted as a volume in /app.
+- **redis** : store hosts data
+- **sshserver** : simple alpine container. Provide a SSH endpoint. A passwordless UNIX user "john" is already created for test purposes.
+- **dotnet** : is using official microsoft/dotnet image (latest build atm). The application is mounted as a volume in /app.
 
 ```shell
 # Run the test docker-compose
