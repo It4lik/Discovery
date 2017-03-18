@@ -81,7 +81,7 @@ root@disco:/app# dotnet run
 $ docker run -d -p 6379:6379 --network discovery_disco_net redis
 
 // You can SSH with John's account on SSH server to see the logfile :
-$ ssh john@localhost -p 4444
+$ ssh john@localhost -p 2222
 sshserver:~$ ls
 ```
 
