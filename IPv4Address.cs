@@ -4,7 +4,7 @@ namespace discovery
 {
     public abstract class IPv4Address
     {
-        /// Converts a "192.168.1.0" address to his binary equivalet WITHOUT the dots (eg. a 32 characters long string (binary))
+        /// Converts a "192.168.1.0" address to his binary equivalent WITHOUT the dots (eg. a 32 characters long string (binary))
         protected string DecimalIPtoBinIP(string ipToConvert) {
             string tempIP = string.Empty; string toConcat = string.Empty;
             for (int i = 0; i < ipToConvert.Split('.').Length; i++)

@@ -11,7 +11,7 @@ namespace discovery
         private enum UsefulIPs {broadcast, firstFree, lastFree, network};
         /// This is used for subnet shrinking. A "first" network doesn't have a broadcast address. A "last" network doesn't have broadcast address. A "none" have NONE of these two addresses (eg getAllIPsInSubnet() will return ALL IPS). When shrinking a /22 in four /24, there are still only one network address and one broadcast address from the /22 perspective. A "normal" get both subnet and broadcast address 
         public enum ShrinkedSubnetType {first, none, last, normal}; 
-         /// Only subnet address. Ex : "192.168.1.0"
+        /// Only subnet address. Ex : "192.168.1.0"
         private  string _networkIP;
         /// Only mask, CIDR format. Ex : 24
         private int _maskCIDR;
@@ -21,9 +21,9 @@ namespace discovery
         private string _netmask;
         /// First free IP address in subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.0000001".
         private string _firstFreeIP;
-        // Last free IP address in subnet, binary, WITH DOTS, ends with 0. Ex : "11010111.11010011.11011000.11111110".
+        /// Last free IP address in subnet, binary, WITH DOTS, ends with 0. Ex : "11010111.11010011.11011000.11111110".
         private string _lastFreeIP;
-        // Last IP address of subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.11111111".
+        /// Last IP address of subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.11111111".
         private string _broadcastIP; 
 
         /// Create a new Subnet using its CIDR formatted address (like "192.168.1.0/24")
@@ -191,11 +191,23 @@ namespace discovery
             return IPs;
         }
         public List<string> getAllIPsInSubnet() {
-
-            if(_type == ShrinkedSubnetType.first) {
-                string currentBinIP = DecimalIPtoBinIP(_networkIP); 
-            }
+            string currentBinIP;
             string endBinIP = _broadcastIP;
+
+            switch (_type)
+            {
+                // This is used to include the very first IP of the subnet in the returned list (used in subnet shrinking)
+                case ShrinkedSubnetType.none:
+                case ShrinkedSubnetType.last:
+                    currentBinIP = BinIPtoBinIPWithDots(DecimalIPtoBinIP(_networkIP)); 
+                    break;
+                // this is used to exclude the very first IP of the subnet because it's the network address 
+                case ShrinkedSubnetType.first:
+                case ShrinkedSubnetType.normal:
+                default:
+                    currentBinIP = _firstFreeIP;
+                    break;
+            }
             // Return value. Will contain all IPs in the subnet
             List<string> IPs = new List<string>();
 
@@ -209,11 +221,16 @@ namespace discovery
                 // Increment current IP
                 currentBinIP = IncrementIP(currentBinIP);
             }
+
+            // If the subnet is a "first" or "none" subnet it doesn't have a broadcast address (used in subnet shrinking)
+            if (_type == ShrinkedSubnetType.first || _type == ShrinkedSubnetType.none) 
+                IPs.Add(BinIPtoDecimalIP(endBinIP));
+
             return IPs;
         }
 
         /// This method is used to shred networkToShrink in multiple subnets with a maskCIDR mask. (ie This will shrink 192.168.0.0/23 in 192.168.0.0/24 and 192.168.1.0/24)
-        public List<Subnet> shrinkSubnetInSpecifiedSize(Subnet CIDRNetworkToShrink, int maskCIDR) {
+        /*public List<Subnet> shrinkSubnetInSpecifiedSize(Subnet CIDRNetworkToShrink, int maskCIDR) {
             // The specified mask must be inferior to the original mask
             if ()
             
@@ -223,7 +240,7 @@ namespace discovery
             // This is the "fix part" of the subnet address : every bits in the initial mask. This will never change. 
 
             return shrunkSubnets;
-        }
+        }*/
         private bool verifyAddressCIDR(string CIDRAddress) {
             // Used to verify that a string is a subnet IPv4 address formatted in CIDR (as in "192.168.1.0/24)
             Regex CIDRRegex = new Regex(@"^(([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){2}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/(([1-9])|([12][0-9])|(3[0-2]))$");
