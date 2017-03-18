@@ -9,7 +9,8 @@ namespace discovery
     class Program
     {
         static void Main(string[] args)
-        {                
+        {   
+            /*             
             // Subnet on which do the tests
             Subnet LAN = new Subnet("192.168.1.0/24");
             // Redis connection to use
@@ -21,6 +22,7 @@ namespace discovery
             // Object that issue the discovery
             Discover disco = new Discover(Discover.CheckType.tcp, LAN, 6379, actionIfUp, actionIfDown, redis, "LAN");
             disco.startDiscovery();
+            */
         }
     }
 }

@@ -132,6 +132,11 @@ namespace discovery
             }
             return IPs;
         }
+        public List<Subnet> shredSubnetInSpecifiedSize(Subnet subnet, int maskCIDR) {
+            List<Subnet> shredSubnets = new List<Subnet>();
+
+            return shredSubnets;
+        }
         private bool verifyAddressCIDR(string CIDRAddress) {
             // Used to verify that a string is a subnet IPv4 address formatted in CIDR (as in "192.168.1.0/24)
             Regex CIDRRegex = new Regex(@"^(([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){2}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/(([1-9])|([12][0-9])|(3[0-2]))$");

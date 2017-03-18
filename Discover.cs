@@ -77,6 +77,7 @@ namespace discovery
             List<string> aliveHosts = new List<string>();
             List<string> existingHosts = new List<string>();
 
+            
             //while (true) {
             for (int i = 0; i < 1; i++) {
                 // Used to store aliveHosts detected by check
@@ -119,7 +120,7 @@ namespace discovery
                     if ( (! _redis.doesKeyExist(_discoveryName, aliveHost)) || (_redis.Read(_discoveryName, aliveHost) == "DOWN")) {
                         Console.WriteLine("{0}: Host {1} was not in Redis. Adding it.", _discoveryName, aliveHost); // Debug console output
                         // Mark the host as UP in redis
-                        _redis.Write(_discoveryName, aliveHost);
+                        _redis.markHostUp(_discoveryName, aliveHost);
                         // Execute the _actionIfUp action
                         _actionIfUp.Execute(aliveHost);
                     }

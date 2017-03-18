@@ -22,5 +22,9 @@ namespace discovery
             // convert a binary int to a decimal int (only strings)
             return Convert.ToInt32(stringNumberToConvert, 2).ToString();
         }
+
+        public static string incrementBin(string binToIncrement) {
+            return decimalToBin(Convert.ToInt32(binToDecimal(binToIncrement)) + 1);
+        }
     }
 }
