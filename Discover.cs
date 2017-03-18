@@ -2,7 +2,6 @@ using System.Threading;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace discovery
 {
@@ -45,7 +44,7 @@ namespace discovery
             _discoveryName = discoveryName;
             _cts = new CancellationTokenSource();
 
-            // Default
+            // Maximum number of threads
             _maxThreads = maxThreads;
 
             if (shrunkNetworksCIDRMask > _targetedSubnet._maskCIDR) {
@@ -77,7 +76,7 @@ namespace discovery
                         // _cts.Token is always sent : it is used to stop threads
                         case CheckType.tcp:
                         default:
-                            discoveryUpTcp(_cts.Token, shrunkSubnet, Guid.NewGuid().ToString());
+                            discoveryTcp(_cts.Token, shrunkSubnet, Guid.NewGuid().ToString());
                             break;
                     }
                 });
@@ -95,13 +94,13 @@ namespace discovery
         }
 
         /// Method used by TCP check threads to discover new hosts
-        private void discoveryUpTcp(CancellationToken cancelToken, Subnet targetedNetwork, string threadNumber) {
+        private void discoveryTcp(CancellationToken cancelToken, Subnet targetedNetwork, string threadNumber) {
             // Used to store hosts that are currently alive : TCP connection succeeded
             List<string> aliveHosts = new List<string>();
             // Used to store hosts that are currently marked as "UP" in Redis
             List<string> existingHosts = new List<string>();
             // Regex used to test if an address belongs to the current thread's subnet
-
+            
 
             // Current thread prefix
             string threadPrefix = String.Concat(_discoveryName, threadNumber);
@@ -126,13 +125,16 @@ namespace discovery
                 //  - execute _actionIfDown
                 */
                 foreach (string existingHost in existingHosts) {
-                    // If the host is in redis as "UP", but not in current alive hosts list
-                    if ( (! aliveHosts.Contains(existingHost)) && (_redis.Read(threadPrefix, existingHost) == "UP") ) {
-                        Console.WriteLine("{0}: Deleting {1} which is not alive.", threadPrefix, existingHost); // Debug console output
-                        // Mark the host as down in redis
-                        _redis.markHostDown(threadPrefix, existingHost);
-                        // Execute action _actionIfDown
-                        _actionIfDown.Execute(existingHost, threadPrefix);
+                    // If the current existingHost belongs to current subnet (eg does this host is concern the current thread ?)
+                    if (targetedNetwork.isInSubnet(existingHost)) {
+                        // If the host is in redis as "UP", but not in current alive hosts list
+                        if ( (! aliveHosts.Contains(existingHost)) && (_redis.Read(_discoveryName, existingHost) == "UP") ) {
+                            Console.WriteLine("{0}: Deleting {1} which is not alive.", threadPrefix, existingHost); // Debug console output
+                            // Mark the host as down in redis
+                            _redis.markHostDown(_discoveryName, existingHost);
+                            // Execute action _actionIfDown
+                            _actionIfDown.Execute(existingHost, threadPrefix);
+                        }
                     }
                 }
 
@@ -144,15 +146,15 @@ namespace discovery
                 */
                 foreach (string aliveHost in aliveHosts) {
                     // If the host is alive and doesn't exist in redis or marked as DOWN
-                    if ( (! _redis.doesKeyExist(threadPrefix, aliveHost)) || (_redis.Read(threadPrefix, aliveHost) == "DOWN")) {
+                    if ( (! _redis.doesKeyExist(_discoveryName, aliveHost)) || (_redis.Read(_discoveryName, aliveHost) == "DOWN")) {
                         Console.WriteLine("{0}: Host {1} was not in Redis. Adding it.", threadPrefix, aliveHost); // Debug console output
                         // Mark the host as UP in redis
-                        _redis.markHostUp(threadPrefix, aliveHost);
+                        _redis.markHostUp(_discoveryName, aliveHost);
                         // Execute the _actionIfUp action
                         _actionIfUp.Execute(aliveHost, threadPrefix);
                     }
                     else {
-                        Console.WriteLine("{0}: Host {1} was already in Redis ! Value : {2}", threadPrefix, aliveHost, _redis.Read(threadPrefix, aliveHost)); // Debug console output
+                        Console.WriteLine("{0}: Host {1} was already in Redis ! Value : {2}", threadPrefix, aliveHost, _redis.Read(_discoveryName, aliveHost)); // Debug console output
                     }
                 }
             

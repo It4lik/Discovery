@@ -20,7 +20,7 @@ namespace discovery
             // Action to do if a host is down
             HostAction actionIfDown = new HostAction(HostAction.ActionType.SSHExec, "192.168.1.94", 2222, "john", "dbc", "echo \"<HOST> became DOWN at <TIME>\"  >> ZALU");
             // Object that issue the discovery
-            Discover disco = new Discover(Discover.CheckType.tcp, LAN, 6379, actionIfUp, actionIfDown, redis, "LAN", 6);
+            Discover disco = new Discover(Discover.CheckType.tcp, LAN, 443, actionIfUp, actionIfDown, redis, "LAN", 6);
             disco.startDiscovery();
 
         }

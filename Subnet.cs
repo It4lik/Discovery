@@ -31,7 +31,7 @@ namespace discovery
             // Verify that address is correctly formatted
             if (this.verifyAddressCIDR(CIDRAddress)) {
                 _maskCIDR = System.Convert.ToInt32(CIDRAddress.Split('/')[1]);
-                _networkIP = this.DetermineNetworkIP(_maskCIDR, CIDRAddress.Split('/')[0]);
+                _networkIP = this.DetermineNetworkIP(CIDRAddress.Split('/')[0], _maskCIDR);
                 _netmask = this.DetermineNetmask(_networkIP, _maskCIDR);
                 _type = this._type = ShrinkedSubnetType.normal;
                 // Set _firstFreeIP, _lastFreeIP and _broadcastIP properties
@@ -47,7 +47,7 @@ namespace discovery
             // Verify that address is correctly formatted
             if (this.verifyAddressCIDR(_CIDRAddress)) {
                 _maskCIDR = System.Convert.ToInt32(_CIDRAddress.Split('/')[1]);
-                _networkIP = this.DetermineNetworkIP(_maskCIDR, _CIDRAddress.Split('/')[0]);
+                _networkIP = this.DetermineNetworkIP(_CIDRAddress.Split('/')[0], _maskCIDR);
                 _netmask = this.DetermineNetmask(_networkIP, _maskCIDR);
                 _type = this._type = type;
                 // Set _firstFreeIP, _lastFreeIP and _broadcastIP properties
@@ -166,7 +166,7 @@ namespace discovery
 
             // Get needed addresses
             int maskCIDR = System.Convert.ToInt32(CIDRSubnet.Split('/')[1]);
-            string networkIP = this.DetermineNetworkIP(maskCIDR, CIDRSubnet.Split('/')[0]);
+            string networkIP = this.DetermineNetworkIP(CIDRSubnet.Split('/')[0], maskCIDR);
             string broadcastIP = this.DetermineBroadcastAddress(networkIP, maskCIDR);
 
             // Temp variables used to iterate from the first to the last IP
@@ -296,13 +296,11 @@ namespace discovery
             return shrunkSubnets;
         }
 
-        /// Determine if an IP is a specific network (network is CIDR formatted like "192.168.1.0/24")
-        public bool isInSubnet(string IPAddress, string networkIPCIDRAddress) {
-            // Get the wanted mask (mask of networkIPCIDRAddress)
-            int wantedMask = Convert.ToInt32(networkIPCIDRAddress.Split('/')[1]);
+        /// Determine if an IP is in current network
+        public bool isInSubnet(string IPAddress) {
             // Determine network IP of both IPs
-            string IPNetworkIP = DetermineNetworkIP(IPAddress, wantedMask);
-            string networkNetworkIP = DetermineNetworkIP(networkIPCIDRAddress.Split('/')[0], wantedMask);
+            string IPNetworkIP = DetermineNetworkIP(IPAddress, _maskCIDR);
+            string networkNetworkIP = DetermineNetworkIP(_networkIP, _maskCIDR);
             // If the network addresses are the same, IPAddress does belong to networkIPCIDRAddress
             if (IPNetworkIP == networkNetworkIP)
                 return true;
