@@ -11,12 +11,12 @@ namespace discovery
         private enum UsefulIPs {broadcast, firstFree, lastFree, network};
         /// This is used for subnet shrinking. A "first" network doesn't have a broadcast address. A "last" network doesn't have broadcast address. A "none" have NONE of these two addresses (eg getAllIPsInSubnet() will return ALL IPS). When shrinking a /22 in four /24, there are still only one network address and one broadcast address from the /22 perspective. A "normal" get both subnet and broadcast address 
         public enum ShrinkedSubnetType {first, none, last, normal}; 
-        /// Only subnet address. Ex : "192.168.1.0"
-        private  string _networkIP;
+        /// CIDR address of network (used as argument in constructor) like "192.168.1.0/24")
+        public string _networkIP { get; set; }
         /// Only mask, CIDR format. Ex : 24
-        private int _maskCIDR;
+        public int _maskCIDR { get; set; }
         /// Used for subnet shrinking
-        private ShrinkedSubnetType _type;
+        public ShrinkedSubnetType _type { get; set; }
         /// Only mask, binary format, NO DOTS, 32 chars. Ex : "11111111111111111100000000000000"
         private string _netmask;
         /// First free IP address in subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.0000001".
@@ -27,11 +27,11 @@ namespace discovery
         private string _broadcastIP; 
 
         /// Create a new Subnet using its CIDR formatted address (like "192.168.1.0/24")
-        public Subnet(string _CIDRAddress) {
+        public Subnet(string CIDRAddress) {
             // Verify that address is correctly formatted
-            if (this.verifyAddressCIDR(_CIDRAddress)) {
-                _maskCIDR = System.Convert.ToInt32(_CIDRAddress.Split('/')[1]);
-                _networkIP = this.DetermineNetworkIP(_maskCIDR, _CIDRAddress.Split('/')[0]);
+            if (this.verifyAddressCIDR(CIDRAddress)) {
+                _maskCIDR = System.Convert.ToInt32(CIDRAddress.Split('/')[1]);
+                _networkIP = this.DetermineNetworkIP(_maskCIDR, CIDRAddress.Split('/')[0]);
                 _netmask = this.DetermineNetmask(_networkIP, _maskCIDR);
                 _type = this._type = ShrinkedSubnetType.normal;
                 // Set _firstFreeIP, _lastFreeIP and _broadcastIP properties
@@ -230,23 +230,23 @@ namespace discovery
         }
 
         /// This method is used to shred networkToShrink in multiple subnets with a maskCIDR mask. (ie This will shrink 192.168.0.0/23 in 192.168.0.0/24 and 192.168.1.0/24)
-        public List<string> shrinkSubnet(Subnet CIDRNetworkToShrink, int newMaskCIDR) {
+        public List<Subnet> Shrink (int newMaskCIDR) {
             // The specified mask must be inferior to the original mask
-            if (CIDRNetworkToShrink._maskCIDR >= newMaskCIDR) {
+            if (this._maskCIDR >= newMaskCIDR) {
                 Console.WriteLine("FATAL: You can't shrink in a larger subnet or same size. Exiting.");
                 System.Environment.Exit(5);
             }
 
             /// Return value
-            List<string> shrunkSubnets = new List<string>();
+            List<Subnet> shrunkSubnets = new List<Subnet>();
             
             // IP address of initial network, binary formatted, without dots. Like "01011101010001100100100001000100"
-            string initialNetworkBinIP = CIDRNetworkToShrink.DecimalIPtoBinIP(_networkIP);
+            string initialNetworkBinIP = this.DecimalIPtoBinIP(_networkIP);
 
             // The "fix part" of the subnet address : every bits in the initial mask. These will never change. 
-            string fixPart = initialNetworkBinIP.Substring(0, CIDRNetworkToShrink._maskCIDR);
+            string fixPart = initialNetworkBinIP.Substring(0, this._maskCIDR);
             // The "net part" are the bits who are going to be part of the new network adresses for each resulting shrunk subnet
-            string netPart = initialNetworkBinIP.Substring(CIDRNetworkToShrink._maskCIDR, (newMaskCIDR - CIDRNetworkToShrink._maskCIDR));
+            string netPart = initialNetworkBinIP.Substring(this._maskCIDR, (newMaskCIDR - this._maskCIDR));
             // The "ip range part" are the bits that are going to be out of the new masks
             string ipRangePart = initialNetworkBinIP.Substring(newMaskCIDR);
             
@@ -264,7 +264,7 @@ namespace discovery
             */   
 
             char[] lastNetworkAddressArray = initialNetworkBinIP.ToCharArray();
-            for (int i = CIDRNetworkToShrink._maskCIDR; i < newMaskCIDR; i++)
+            for (int i = this._maskCIDR; i < newMaskCIDR; i++)
             {
                 lastNetworkAddressArray[i] = '1';
             }
@@ -273,18 +273,27 @@ namespace discovery
 
             // Incremented IP address all along the loop
             string currentBinIP = initialNetworkBinIP;
+
+
+            // Add the first Subnet to the returned list using currentBinIP but correctly formatted : "192.168.1.0/26" (with new mask) to initialize the Subnet object
+            shrunkSubnets.Add(new Subnet(String.Concat((BinIPtoDecimalIP(BinIPtoBinIPWithDots(currentBinIP))), '/', newMaskCIDR), ShrinkedSubnetType.first));
+            // Increment netPart
+            netPart = BinaryTools.incrementBin(netPart).Substring(BinaryTools.incrementBin(netPart).Length - netPart.Length, netPart.Length); // Substring is used because increment bin always return an 8 bit string (or any other 8 multiples)
+            // Create the new currentBinIP by concatenating fixPart netPart and ipRangePart
+            currentBinIP = String.Concat(fixPart, netPart, ipRangePart);
+
             do
             {
-                // Add currentBinIP to the returned list but correctly formatted : "192.168.1.0/26" (new mask)
-                shrunkSubnets.Add(String.Concat((BinIPtoDecimalIP(BinIPtoBinIPWithDots(currentBinIP))), '/', newMaskCIDR));
+                // Add a new none Subnet to the returned list using currentBinIP but correctly formatted : "192.168.1.0/26" (with new mask) to initialize the Subnet object
+                shrunkSubnets.Add(new Subnet(String.Concat((BinIPtoDecimalIP(BinIPtoBinIPWithDots(currentBinIP))), '/', newMaskCIDR), ShrinkedSubnetType.none));
                 // Increment netPart
                 netPart = BinaryTools.incrementBin(netPart).Substring(BinaryTools.incrementBin(netPart).Length - netPart.Length, netPart.Length); // Substring is used because increment bin always return an 8 bit string (or any other 8 multiples)
                 // Create the new currentBinIP by concatenating fixPart netPart and ipRangePart
                 currentBinIP = String.Concat(fixPart, netPart, ipRangePart);
             } while (currentBinIP != lastNetworkAddress);
 
-            // Add the last one
-            shrunkSubnets.Add(String.Concat((BinIPtoDecimalIP(BinIPtoBinIPWithDots(lastNetworkAddress))), '/', newMaskCIDR));
+            // Add the last Subnet to the returned list using currentBinIP but correctly formatted : "192.168.1.0/26" (with new mask) to initialize the Subnet object
+            shrunkSubnets.Add(new Subnet(String.Concat((BinIPtoDecimalIP(BinIPtoBinIPWithDots(lastNetworkAddress))), '/', newMaskCIDR), ShrinkedSubnetType.last));
 
             return shrunkSubnets;
         }

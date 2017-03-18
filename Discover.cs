@@ -10,18 +10,31 @@ namespace discovery
         // Discover has a Thread property : an instance of Discover use a Thread to issue checks in a subnet
         
         public enum CheckType { tcp };
-        private Thread _discovery; // Thread used to issue checks in subnet and r/w in Redis. // THIS IS GOING TO DISAPPEAR
-        private List<Thread> _discoveries; // These are every threads used to scan each Subnet in _shrunkSubnets
-        private CancellationTokenSource _cts; // CancellationTokenSource used to properly stop threads (eg checks).
-        private CheckType _checkType; // Check to use on subnet's hosts.
-        private Subnet _targetedSubnet; // Subnet on which issue checks.
-        private List<Subnet> _shrunkSubnets;  // This is obtained by shrinking the _targetedSubnet
-        private int _targetedPort; // Targeted port of hosts.
-        private Stocker _redis; // Holds the current redis connection.
-        private HostAction _actionIfUp; // Holds the action to do when finding a host
-        private HostAction _actionIfDown; // Holds the action to do when a host disapppeared
-        private string _discoveryName; // Arbitrary name.
-        public Discover(CheckType checkType, Subnet targetedSubnet, int port, HostAction actionIfUp, HostAction actionIfDown, Stocker redis, string discoveryName) {
+        /// These are every threads used to scan each Subnet in _shrunkSubnets
+        private List<Thread> _discoveries; 
+        /// CancellationTokenSource used to properly stop threads (eg checks).
+        private CancellationTokenSource _cts; 
+        /// Check to use on subnet's hosts.
+        private CheckType _checkType;
+        /// Subnet on which issue checks.
+        private Subnet _targetedSubnet; 
+        /// This is obtained by shrinking the _targetedSubnet
+        private List<Subnet> _shrunkSubnets;  
+        /// The mask wanted to shrink the subnet (one thread will take care of each subnet)
+        private int _shrunkNetworksCIDRMask;
+        /// Maximum number of threads that can for on subnet
+        private int _maxThreads; 
+        /// Targeted port of hosts.
+        private int _targetedPort; 
+        /// Holds the current redis connection
+        private Stocker _redis; 
+        /// Holds the action to do when finding a host
+        private HostAction _actionIfUp; 
+        /// Holds the action to do when a host disapppeared
+        private HostAction _actionIfDown; 
+        /// Arbitrary name
+        private string _discoveryName; 
+        public Discover(CheckType checkType, Subnet targetedSubnet, int port, HostAction actionIfUp, HostAction actionIfDown, Stocker redis, string discoveryName, int maxThreads = 3, int shrunkNetworksCIDRMask = 24) {
             // Initalize object properties
             _checkType = checkType;
             _targetedSubnet = targetedSubnet;
@@ -32,21 +45,47 @@ namespace discovery
             _discoveryName = discoveryName;
             _cts = new CancellationTokenSource();
 
-            // HERE shrink network
+            // Default
+            _maxThreads = maxThreads;
+
+            if (shrunkNetworksCIDRMask > _targetedSubnet._maskCIDR) {
+                // Shrinking initial subnets in multiple smaller ones
+                _shrunkNetworksCIDRMask = shrunkNetworksCIDRMask;
+                _shrunkSubnets = _targetedSubnet.Shrink(_shrunkNetworksCIDRMask);
+            }
+
+            /* foreach (Subnet net in _shrunkSubnets) {
+                // Debug console output
+                Console.WriteLine("One shrunk network is {0}/{1}. Type : {2}.", net._networkIP, net._maskCIDR, net._type);
+            } */
 
             // Initialize every _discoveries Thread with targeted CheckType and subnets in _shrunkSubnets
-            initializeDiscoveriesThreads();
+            //initializeDiscoveriesThreads();
         }
-
+        /// Used to start threads that issue scans
         public void startDiscovery() {
-            // Used to start the thread that issue scans
+            Thread discovery;
 
-            // Implementing subnet shrinking :
-            //   - this must be a for each in _discoveries list
-            //   - each thread in _discoveries list must be started
+            // Implementing subnet shrinking
 
-            _discovery.Start();
-            Console.WriteLine("DEBUG: Thread {0} started.", _discoveryName); // Debug console output
+            int i = 0;
+            foreach(Subnet net in _shrunkSubnets) {
+                switch (_checkType) {
+                    // _cts.Token is always sent : it is used to stop threads
+                    case CheckType.tcp:
+                    default:
+                        // Instanciate the thread with discoveryTcp method.
+                        discovery = new Thread(delegate() {
+                            discoveryTcp(_cts.Token);
+                        });
+                        break;
+                }
+                Console.WriteLine("DEBUG: Thread {0}{1} initialized.", _discoveryName, i); // Debug console output
+                discovery.Start();
+                Console.WriteLine("DEBUG: Thread {0}{1} started.", _discoveryName, i); // Debug console output
+                i++;
+            }
+
         }
 
         public void stopDiscovery() {
@@ -60,25 +99,22 @@ namespace discovery
             // Implementing subnet shrinking : 
             //   - this must be a foreach on _shrunkSubnets
             //   - each iteration initialize a thread in _discoveries
-            switch (_checkType) {
-                // _cts.Token is always sent : it is used to stop threads
-                case CheckType.tcp:
-                    // Instanciate the thread with discoveryTcp method.
-                    _discovery = new Thread(delegate() {
-                        discoveryTcp(_cts.Token);
-                    });
-                    Console.WriteLine("DEBUG: Thread {0} initialized.", _discoveryName); // Debug console output
+            foreach(Subnet net in _shrunkSubnets) {
+                switch (_checkType) {
+                    // _cts.Token is always sent : it is used to stop threads
+                    case CheckType.tcp:
+                    default:
+                        // Instanciate the thread with discoveryTcp method.
+                        Thread discovery = new Thread(delegate() {
+                            discoveryTcp(_cts.Token);
+                        });
+                        _discoveries.Add(discovery);
+                        Console.WriteLine("DEBUG: Thread {0} initialized.", _discoveryName); // Debug console output
 
-                    break;
-                
-                default:
-                    // Default is TCP check. See case CheckType.tcp:
-                    _discovery = new Thread(delegate() {
-                        discoveryTcp(_cts.Token);
-                    });
-                    
-                    break;
+                        break;
+                }
             }
+
         }
         
         private void discoveryCustom(string command) {

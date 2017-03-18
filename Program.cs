@@ -21,12 +21,7 @@ namespace discovery
             HostAction actionIfDown = new HostAction(HostAction.ActionType.SSHExec, "192.168.1.94", 2222, "john", "dbc", "echo \"<HOST> became DOWN at <TIME>\"  >> ZALU");
             // Object that issue the discovery
             Discover disco = new Discover(Discover.CheckType.tcp, LAN, 6379, actionIfUp, actionIfDown, redis, "LAN");
-            //disco.startDiscovery();
-
-            foreach (string subnet in LAN.shrinkSubnet(LAN, 26)) {
-                Console.WriteLine(subnet);
-            }
-
+            disco.startDiscovery();
         }
     }
 }
