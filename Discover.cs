@@ -68,13 +68,12 @@ namespace discovery
 
         /// Used to start threads that issue scans
         public void startDiscovery() {
+            // Int used to give a unique id to each thread
             int threadId = 0;
-            
             //while (true) {
             for (int i = 0; i < 1; i++) {
                 // Parralel iteration on each shrunkSubnet, using multithreading. 
 			    _shrunkSubnets.AsParallel().WithDegreeOfParallelism(_maxThreads).WithCancellation(_cts.Token).ForAll(shrunkSubnet => {
-                    // te permet de récupérer l'ID du Thread en cours, je ne l'ai pas testé donc je ne sais pas ce que ça va donner dans ton cas :D
                     threadId++;
                     switch (_checkType) {
                         // _cts.Token is always sent : it is used to stop threads
