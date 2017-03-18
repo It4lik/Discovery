@@ -51,3 +51,7 @@ HostAction actionIfDown = new HostAction(HostAction.ActionType.SSHExec,
 Discover disco = new Discover(Discover.CheckType.tcp, yourNetwork, 6379, actionIfUp, actionIfDown, redis, "SuperNetworkName");
 disco.startDiscovery();
 ```
+
+## TODO
+- Redis : use database object only
+- Threads : better implementation (subnet shrinking)
