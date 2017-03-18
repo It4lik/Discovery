@@ -61,7 +61,7 @@ Use the docker-compose.yml file to spin up three containers and a dedicated netw
     - the Discovery service will write in the homedir of a user called John (/home/John) when a up is up or down
 - a dotnet container with application mounted in /app
 
-```shell
+```
 $ cd Discovery
 // Switch on docker_tests branch
 $ git checkout docker_tests
