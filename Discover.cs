@@ -2,6 +2,7 @@ using System.Threading;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace discovery
 {
@@ -68,18 +69,15 @@ namespace discovery
 
         /// Used to start threads that issue scans
         public void startDiscovery() {
-            // Int used to give a unique id to each thread
-            int threadId = 0;
             //while (true) {
             for (int i = 0; i < 1; i++) {
                 // Parralel iteration on each shrunkSubnet, using multithreading. 
 			    _shrunkSubnets.AsParallel().WithDegreeOfParallelism(_maxThreads).WithCancellation(_cts.Token).ForAll(shrunkSubnet => {
-                    threadId++;
                     switch (_checkType) {
                         // _cts.Token is always sent : it is used to stop threads
                         case CheckType.tcp:
                         default:
-                            discoveryTcp(_cts.Token, shrunkSubnet, threadId);
+                            discoveryUpTcp(_cts.Token, shrunkSubnet, Guid.NewGuid().ToString());
                             break;
                     }
                 });
@@ -96,12 +94,14 @@ namespace discovery
             // thread that issue shell commands
         }
 
-        /// Method used by TCP check threads
-        private void discoveryTcp(CancellationToken cancelToken, Subnet targetedNetwork, int threadNumber) {
+        /// Method used by TCP check threads to discover new hosts
+        private void discoveryUpTcp(CancellationToken cancelToken, Subnet targetedNetwork, string threadNumber) {
             // Used to store hosts that are currently alive : TCP connection succeeded
             List<string> aliveHosts = new List<string>();
             // Used to store hosts that are currently marked as "UP" in Redis
             List<string> existingHosts = new List<string>();
+            // Regex used to test if an address belongs to the current thread's subnet
+
 
             // Current thread prefix
             string threadPrefix = String.Concat(_discoveryName, threadNumber);

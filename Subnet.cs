@@ -72,11 +72,9 @@ namespace discovery
             }
             return netmask;
         }
-
-        private string DetermineNetworkIP(int netmask, string ipAddress) {
-        // this will return the first IP of a network eg the network address in decimal format
-
-            string binIpAddress = DecimalIPtoBinIP(ipAddress);
+        /// This will return the first IP of a network, eg the network address in decimal format. Netmask is an int ('24' in "192.168.1.10/24")
+        private string DetermineNetworkIP(string IPAddress, int netmask) {
+            string binIpAddress = DecimalIPtoBinIP(IPAddress);
             string networkBinIpAddress = string.Empty;
             for (int i = 0; i < netmask; i++)
             {
@@ -298,7 +296,19 @@ namespace discovery
             return shrunkSubnets;
         }
 
-
+        /// Determine if an IP is a specific network (network is CIDR formatted like "192.168.1.0/24")
+        public bool isInSubnet(string IPAddress, string networkIPCIDRAddress) {
+            // Get the wanted mask (mask of networkIPCIDRAddress)
+            int wantedMask = Convert.ToInt32(networkIPCIDRAddress.Split('/')[1]);
+            // Determine network IP of both IPs
+            string IPNetworkIP = DetermineNetworkIP(IPAddress, wantedMask);
+            string networkNetworkIP = DetermineNetworkIP(networkIPCIDRAddress.Split('/')[0], wantedMask);
+            // If the network addresses are the same, IPAddress does belong to networkIPCIDRAddress
+            if (IPNetworkIP == networkNetworkIP)
+                return true;
+            else
+                return false;
+        }
         private bool verifyAddressCIDR(string CIDRAddress) {
             // Used to verify that a string is a subnet IPv4 address formatted in CIDR (as in "192.168.1.0/24)
             Regex CIDRRegex = new Regex(@"^(([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){2}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/(([1-9])|([12][0-9])|(3[0-2]))$");
