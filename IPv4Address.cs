@@ -4,9 +4,8 @@ namespace discovery
 {
     public abstract class IPv4Address
     {
-
+        /// Converts a "192.168.1.0" address to his binary equivalent WITHOUT the dots (eg. a 32 characters long string (binary))
         protected string DecimalIPtoBinIP(string ipToConvert) {
-            // convert a "192.168.1.0" address to his binary equivalet WITHOUT the dots (eg. a 32 characters long string (binary))
             string tempIP = string.Empty; string toConcat = string.Empty;
             for (int i = 0; i < ipToConvert.Split('.').Length; i++)
             {
@@ -21,37 +20,26 @@ namespace discovery
             // Like 01000010111010100101011010101001 to 01001001.10020101.11111011.11001011
             return String.Concat(binIPWithoutDots.Substring(0, 8), '.', binIPWithoutDots.Substring(8, 8), '.', binIPWithoutDots.Substring(16, 8), '.', binIPWithoutDots.Substring(24, 8));
         }
-
+        /// Convert a binary IP with dots to a binary without dots. Like 01001001.10020101.11111011.11001011 to 01000010111010100101011010101001
         protected string BinIPtoBinIPWithoutDots(string binIPWithDots) {
-            // Convert a binary IP with dots to a binary without dots
-            // Like 01001001.10020101.11111011.11001011 to 01000010111010100101011010101001
             return binIPWithDots.Replace(".", "");
         }
 
-
+        /// Argument is an IP address, as a string, binary formatted, with dots like "11000000.10101000.00000001.00000000". It returns a decimal IP address like "192.168.1.0" format (decimal)
         protected string BinIPtoDecimalIP(string stringNumberToConvert) {
-            // argument is ip address, as a string, binary formatted, with dots
-            // convert a 32-character long string (binary IP address without dots) to a "192.168.1.0" format (decimal)
-            // takes four 8-character block, convert them to decimal and concatenate them (using a dot as separator)
+
             stringNumberToConvert = BinIPtoBinIPWithoutDots(stringNumberToConvert);
             return String.Concat(BinaryTools.binToDecimal(stringNumberToConvert.Substring(0, 8)), '.', BinaryTools.binToDecimal(stringNumberToConvert.Substring(8, 8)), '.', BinaryTools.binToDecimal(stringNumberToConvert.Substring(16, 8)), '.', BinaryTools.binToDecimal(stringNumberToConvert.Substring(24, 8)));
         }
-
-        protected string[] IPtoStringArray(string iPtoConvert) {
-            // convert an IP address string to a string array using dots as separators
-            return iPtoConvert.Split('.');
-        }
-
         protected string StringArrayToIP(string [] stringArray) {
             // takes a string array and returns the concatenations of all the array and dots (array with values 192,168,0,1 as paramater returns "192.168.0.1")
             return String.Concat(stringArray[0], ".", stringArray[1], ".", stringArray[2], ".", stringArray[3]);
         }
-
+        /// Argument must be an address binary formatted with dots as 00010001.10110110.00101011.00110101
         protected string IncrementIP(string ipToInc) {
-            // Argument must be an address binary formatted with dots as 00010001.10110110.00101011.00110101
             string[] splittedIP = ipToInc.Split('.');
             // For each byte
-            for (var i = 3 ; i >= 0 ; i--){
+            for (var i = 3 ; i >= 0 ; i--) {
                 // This byte has reached max value
                 if(splittedIP[i] == "11111111") { 
                     // This is the bigger byte
@@ -64,10 +52,9 @@ namespace discovery
                         continue;
                     }
                 }
-                else
-                {
+                else {
                     // Inc current byte
-                    splittedIP[i] = BinaryTools.decimalToBin(Convert.ToInt32(BinaryTools.binToDecimal(splittedIP[i])) +1 );
+                    splittedIP[i] = BinaryTools.incrementBin(splittedIP[i]);
                     break;
                 }
             }

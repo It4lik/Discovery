@@ -25,7 +25,7 @@ namespace discovery
                 _port = port;
             }
         }
-        public void Execute(string currentScannedHost) {
+        public void Execute(string currentScannedHost, string threadName) {
             // Execute action
             if (_actionType == ActionType.SSHExec) {
                 // If action is SSHExec, initiate a new SSH connection and issue command
@@ -33,7 +33,8 @@ namespace discovery
                 // Replace host by given value
                 _SSHCommand = _SSHCommand.Replace("<HOST>", currentScannedHost);
                 // Replace time by current time
-                _SSHCommand = _SSHCommand.Replace("<TIME>", DateTime.Now.ToString("h:mm:ss tt"));
+                string curTime = DateTime.Now.ToString("h:mm:ss tt");
+                _SSHCommand = _SSHCommand.Replace("<TIME>", curTime);
 
                 // TODO : Need better handling of different SSH errors
                 try {
@@ -42,7 +43,7 @@ namespace discovery
                         sshclient.Connect();
                         using(var cmd = sshclient.CreateCommand(_SSHCommand)){
                             cmd.Execute();
-                            Console.WriteLine("[{0}]: Command {1} exited with {2} exit code", currentScannedHost, cmd.CommandText, cmd.ExitStatus); 
+                            Console.WriteLine("INFO: {3} on {0}: Command {1} exited with {2} exit code through SSH connection.", currentScannedHost, cmd.CommandText, cmd.ExitStatus, threadName); 
                             }
                             sshclient.Disconnect();
                     }
@@ -50,8 +51,9 @@ namespace discovery
                 catch (System.Exception) {
                         Console.WriteLine("ERROR: Can't issue {0} on host {1} via SSH on port {2}.", _SSHCommand, _host, _port);
                 }
-                // Replace given host by <HOST>> (for next iteration)
+                // Replace given host by <HOST> (for next iteration). Same for TIME
                 _SSHCommand = _SSHCommand.Replace(currentScannedHost, "<HOST>");
+                _SSHCommand = _SSHCommand.Replace(curTime, "<TIME>");
             }
         }
     }
