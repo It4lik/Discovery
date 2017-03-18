@@ -72,22 +72,22 @@ namespace discovery
             // This will be used to launch every thread
             Thread discovery;
 
-            int i = 0;
-            foreach(Subnet net in _shrunkSubnets) {
+            int threadNumber = 1;
+            foreach(Subnet shrunkSubnet in _shrunkSubnets) {
                 switch (_checkType) {
                     // _cts.Token is always sent : it is used to stop threads
                     case CheckType.tcp:
                     default:
                         // Instanciate the thread with discoveryTcp method.
                         discovery = new Thread(delegate() {
-                            discoveryTcp(_cts.Token, net, i);
+                            discoveryTcp(_cts.Token, shrunkSubnet, threadNumber);
                         });
                         break;
                 }
-                Console.WriteLine("DEBUG: Thread {0}{1} initialized.", _discoveryName, i); // Debug console output
+                Console.WriteLine("DEBUG: Thread {0}{1} initialized.", _discoveryName, threadNumber); // Debug console output
                 discovery.Start();
-                Console.WriteLine("DEBUG: Thread {0}{1} started on subnet {2}/{3}.", _discoveryName, i, net._networkIP, net._maskCIDR); // Debug console output
-                i++;
+                Console.WriteLine("DEBUG: Thread {0}{1} started on subnet {2}/{3}.", _discoveryName, threadNumber, shrunkSubnet._networkIP, shrunkSubnet._maskCIDR); // Debug console output
+                threadNumber++;
             }
 
         }
@@ -138,7 +138,7 @@ namespace discovery
                         // Mark the host as down in redis
                         _redis.markHostDown(threadPrefix, existingHost);
                         // Execute action _actionIfDown
-                        _actionIfDown.Execute(existingHost);
+                        _actionIfDown.Execute(existingHost, threadPrefix);
                     }
                 }
 
@@ -155,7 +155,7 @@ namespace discovery
                         // Mark the host as UP in redis
                         _redis.markHostUp(threadPrefix, aliveHost);
                         // Execute the _actionIfUp action
-                        _actionIfUp.Execute(aliveHost);
+                        _actionIfUp.Execute(aliveHost, threadPrefix);
                     }
                     else {
                         Console.WriteLine("{0}: Host {1} was already in Redis ! Value : {2}", threadPrefix, aliveHost, _redis.Read(threadPrefix, aliveHost)); // Debug console output
