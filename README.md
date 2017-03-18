@@ -52,6 +52,40 @@ Discover disco = new Discover(Discover.CheckType.tcp, yourNetwork, 6379, actionI
 disco.startDiscovery();
 ```
 
+## Docker environment
+**Intended for test purposes only**
+
+Use the docker-compose.yml file to spin up three containers and a dedicated network
+- a Redis host
+- an alpine-based SSH server to receive actions
+    - the Discovery service will write in the homedir of a user called John (/home/John) when a up is up or down
+- a dotnet container with application mounted in /app
+
+```shell
+$ cd Discovery
+// Switch on docker_tests branch
+$ git checkout docker_tests
+
+$ docker-compose up -d
+
+// This is manually done. Intended for test purposes. 
+$ docker exec -it discovery_disco_1 bash
+// Cd in application directory
+root@disco:/# cd /app
+// Get the libs
+root@disco:/app# dotnet restore
+// Run the app. The subnet will be scanned onlyn once for test purposes.
+root@disco:/app# dotnet run
+
+// You can spin up additional containers to scan with the following command (or another service who is listening on port TCP 6379 (see Program.cs))
+$ docker run -d -p 6379:6379 --network discovery_disco_net redis
+
+// You can SSH with John's account on SSH server to see the logfile :
+$ ssh john@localhost -p 4444
+sshserver:~$ ls
+```
+
+
 ## TODO
 - Redis : use database object only
 - Threads : better implementation (subnet shrinking)
