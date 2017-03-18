@@ -23,6 +23,13 @@ namespace discovery
             Discover disco = new Discover(Discover.CheckType.tcp, LAN, 6379, actionIfUp, actionIfDown, redis, "LAN");
             disco.startDiscovery();
             */
+
+            Subnet yo = new Subnet("192.168.1.10/24");
+
+            foreach (string curip in yo.getAllFreeIPsFromSubnet("172.1.1.0/24"))
+            {
+                Console.WriteLine(curip);
+            }
         }
     }
 }
