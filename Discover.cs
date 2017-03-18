@@ -10,10 +10,12 @@ namespace discovery
         // Discover has a Thread property : an instance of Discover use a Thread to issue checks in a subnet
         
         public enum CheckType { tcp };
-        private Thread _discovery; // Thread used to issue checks in subnet and r/w in Redis.
+        private Thread _discovery; // Thread used to issue checks in subnet and r/w in Redis. // THIS IS GOING TO DISAPPEAR
+        private List<Thread> _discoveries; // These are every threads used to scan each Subnet in _shrunkSubnets
         private CancellationTokenSource _cts; // CancellationTokenSource used to properly stop threads (eg checks).
         private CheckType _checkType; // Check to use on subnet's hosts.
-        private Subnet _targetedSubnet; // Subnet on which issue checks. 
+        private Subnet _targetedSubnet; // Subnet on which issue checks.
+        private List<Subnet> _shrunkSubnets;  // This is obtained by shrinking the _targetedSubnet
         private int _targetedPort; // Targeted port of hosts.
         private Stocker _redis; // Holds the current redis connection.
         private HostAction _actionIfUp; // Holds the action to do when finding a host
@@ -29,12 +31,20 @@ namespace discovery
             _actionIfDown = actionIfDown;
             _discoveryName = discoveryName;
             _cts = new CancellationTokenSource();
-            // Initialize the _discovery thread with targeted check and subnet (checkType, targetedSubnet)
-            initializeDiscoveryThread();
+
+            // HERE shrink network
+
+            // Initialize every _discoveries Thread with targeted CheckType and subnets in _shrunkSubnets
+            initializeDiscoveriesThreads();
         }
 
         public void startDiscovery() {
             // Used to start the thread that issue scans
+
+            // Implementing subnet shrinking :
+            //   - this must be a for each in _discoveries list
+            //   - each thread in _discoveries list must be started
+
             _discovery.Start();
             Console.WriteLine("DEBUG: Thread {0} started.", _discoveryName); // Debug console output
         }
@@ -45,7 +55,11 @@ namespace discovery
             _cts.Cancel();
             Console.WriteLine("DEBUG: Thread {0} aborted.", _discoveryName); // Debug console output
         }
-        private void initializeDiscoveryThread() {
+        private void initializeDiscoveriesThreads() {
+
+            // Implementing subnet shrinking : 
+            //   - this must be a foreach on _shrunkSubnets
+            //   - each iteration initialize a thread in _discoveries
             switch (_checkType) {
                 // _cts.Token is always sent : it is used to stop threads
                 case CheckType.tcp:

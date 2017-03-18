@@ -9,20 +9,47 @@ namespace discovery
         // Class used to make IPv4 operations
         // This is gonna be exploded into an interface and a "Subnet" class that we can instantiate with one subnet (CIDR format)
         private enum UsefulIPs {broadcast, firstFree, lastFree, network};
-        private  string _networkIP; // Only subnet address. Ex : "192.168.1.0"
-        private int _maskCIDR; // Only mask, CIDR format. Ex : 24
-        private string _netmask; // Only mask, binary format, NO DOTS, 32 chars. Ex : "11111111111111111100000000000000"
-        private string _firstFreeIP; // First free IP address in subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.0000001".
-        private string _lastFreeIP; // Last free IP address in subnet, binary, WITH DOTS, ends with 0. Ex : "11010111.11010011.11011000.11111110".
-        private string _broadcastIP; // Last IP address of subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.11111111".
+        /// This is used for subnet shrinking. A "first" network doesn't have a broadcast address. A "last" network doesn't have broadcast address. A "none" have NONE of these two addresses (eg getAllIPsInSubnet() will return ALL IPS). When shrinking a /22 in four /24, there are still only one network address and one broadcast address from the /22 perspective. A "normal" get both subnet and broadcast address 
+        public enum ShrinkedSubnetType {first, none, last, normal}; 
+         /// Only subnet address. Ex : "192.168.1.0"
+        private  string _networkIP;
+        /// Only mask, CIDR format. Ex : 24
+        private int _maskCIDR;
+        /// Used for subnet shrinking
+        private ShrinkedSubnetType _type;
+        /// Only mask, binary format, NO DOTS, 32 chars. Ex : "11111111111111111100000000000000"
+        private string _netmask;
+        /// First free IP address in subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.0000001".
+        private string _firstFreeIP;
+        // Last free IP address in subnet, binary, WITH DOTS, ends with 0. Ex : "11010111.11010011.11011000.11111110".
+        private string _lastFreeIP;
+        // Last IP address of subnet, binary, WITH DOTS, ends with 1. Ex : "11010111.11010011.11011000.11111111".
+        private string _broadcastIP; 
 
-
+        /// Create a new Subnet using its CIDR formatted address (like "192.168.1.0/24")
         public Subnet(string _CIDRAddress) {
             // Verify that address is correctly formatted
             if (this.verifyAddressCIDR(_CIDRAddress)) {
                 _maskCIDR = System.Convert.ToInt32(_CIDRAddress.Split('/')[1]);
                 _networkIP = this.DetermineNetworkIP(_maskCIDR, _CIDRAddress.Split('/')[0]);
                 _netmask = this.DetermineNetmask(_networkIP, _maskCIDR);
+                _type = this._type = ShrinkedSubnetType.normal;
+                // Set _firstFreeIP, _lastFreeIP and _broadcastIP properties
+                this.setAllUsefulIPs(_networkIP, _maskCIDR);
+            }
+            else {
+                Console.WriteLine("FATAL: This subnet is not a CIDR-formatted IPv4 subnet. Like '192.168.1.0/24'. Exiting.");
+                System.Environment.Exit(5);
+            }
+        }
+        /// Overload used to specify a ShrinkedSubnetType (only used internally)
+        public Subnet(string _CIDRAddress, ShrinkedSubnetType type) {
+            // Verify that address is correctly formatted
+            if (this.verifyAddressCIDR(_CIDRAddress)) {
+                _maskCIDR = System.Convert.ToInt32(_CIDRAddress.Split('/')[1]);
+                _networkIP = this.DetermineNetworkIP(_maskCIDR, _CIDRAddress.Split('/')[0]);
+                _netmask = this.DetermineNetmask(_networkIP, _maskCIDR);
+                _type = this._type = type;
                 // Set _firstFreeIP, _lastFreeIP and _broadcastIP properties
                 this.setAllUsefulIPs(_networkIP, _maskCIDR);
             }
@@ -129,7 +156,7 @@ namespace discovery
                     break;
             }
         }
-        
+
         /// This will return a string list of all IPs in a network (including network's one and broadcast's)
         public List<string> getAllFreeIPsFromSubnet(string CIDRSubnet) {
         
@@ -164,8 +191,11 @@ namespace discovery
             return IPs;
         }
         public List<string> getAllIPsInSubnet() {
-            // Temp variables used to iterate from the first to the last IP
-            string currentBinIP = _firstFreeIP; string endBinIP = _broadcastIP;
+
+            if(_type == ShrinkedSubnetType.first) {
+                string currentBinIP = DecimalIPtoBinIP(_networkIP); 
+            }
+            string endBinIP = _broadcastIP;
             // Return value. Will contain all IPs in the subnet
             List<string> IPs = new List<string>();
 
@@ -181,10 +211,16 @@ namespace discovery
             }
             return IPs;
         }
-        public List<Subnet> shrinkSubnetInSpecifiedSize(Subnet networkToShrink, int maskCIDR) {
-            // This method is used to shred networkToShrink in multiple subnets with a maskCIDR mask
-            // This will shrink 192.168.1.0/23 in 192.168.1.0/24 and 192.168.1.0/24
+
+        /// This method is used to shred networkToShrink in multiple subnets with a maskCIDR mask. (ie This will shrink 192.168.0.0/23 in 192.168.0.0/24 and 192.168.1.0/24)
+        public List<Subnet> shrinkSubnetInSpecifiedSize(Subnet CIDRNetworkToShrink, int maskCIDR) {
+            // The specified mask must be inferior to the original mask
+            if ()
+            
+            // Return value
             List<Subnet> shrunkSubnets = new List<Subnet>();
+            
+            // This is the "fix part" of the subnet address : every bits in the initial mask. This will never change. 
 
             return shrunkSubnets;
         }

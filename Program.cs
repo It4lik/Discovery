@@ -26,7 +26,7 @@ namespace discovery
 
             Subnet yo = new Subnet("192.168.1.10/24");
 
-            foreach (string curip in yo.getAllFreeIPsFromSubnet("172.1.1.0/24"))
+            foreach (string curip in yo.getAllFreeIPsFromSubnet("192.168.1.0/23"))
             {
                 Console.WriteLine(curip);
             }
