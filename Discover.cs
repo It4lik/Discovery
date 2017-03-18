@@ -87,6 +87,7 @@ namespace discovery
                 Console.WriteLine("DEBUG: Thread {0}{1} initialized.", _discoveryName, threadNumber); // Debug console output
                 discovery.Start();
                 Console.WriteLine("DEBUG: Thread {0}{1} started on subnet {2}/{3}.", _discoveryName, threadNumber, shrunkSubnet._networkIP, shrunkSubnet._maskCIDR); // Debug console output
+                //System.Threading.Thread.Sleep(3000);
                 threadNumber++;
             }
 
@@ -112,12 +113,16 @@ namespace discovery
             // Current thread prefix
             string threadPrefix = String.Concat(_discoveryName, threadNumber);
             
+                Console.WriteLine("thread number : {0}", threadNumber);
+
+
             //while (true) {
             for (int i = 0; i < 1; i++) {
                 // Used to store aliveHosts detected by check
                 aliveHosts = Scan.TCPScan(targetedNetwork.getAllIPsInSubnet(), _targetedPort, threadPrefix);
                 existingHosts =  _redis.GetSubnetHosts(threadPrefix);
                 
+
                 if(cancelToken.IsCancellationRequested) {
                     // If stopDiscovery() was called. That means that someone wants to stop the discovery, and thus, this thread. 
                     // Cleanup and exit the while loop.  

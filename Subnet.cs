@@ -252,7 +252,7 @@ namespace discovery
             
             /*
             // We are going to iterate on all shrinked subnets to store them in a list, more specifically, we store their CIDR formatted addresses (like "192.168.1.0/24")
-            // To iterate on these network addresses, we juste need to : 
+            // To iterate on these network addresses, we just need to : 
             //   - keep the fix part (eg keep initialNetworkBinIP bits)
             //   - increment the net part
             //   - set each bit of IP range part to 0 (eg keep initialNetworkBinIP bits)
