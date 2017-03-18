@@ -96,7 +96,8 @@ namespace discovery
             return isHostReachable;
         }
       
-        public static List<string> TCPScan(List<string> targetedIPs, int targetedPort) {
+        /// Use TCPTestHost method to open a TCP connection to every hosts in targetedIPs argument
+        public static List<string> TCPScan(List<string> targetedIPs, int targetedPort, string scanName) {
             // Total number of scanned hosts (253 for a /24 subnet)
             int totalScannedHosts = 0; 
             // Total number of alive host (eg TCP check succeeded)
@@ -105,7 +106,7 @@ namespace discovery
             List<string> aliveHosts = new List<string>();
 
             // Debut console output
-            Console.WriteLine("SCAN STARTED");
+            Console.WriteLine("SCAN {0} STARTED", scanName);
 
             // Iterate on an IP address list returned from iterateOnSubnet method
             foreach (string currentIp in targetedIPs) {
@@ -119,7 +120,7 @@ namespace discovery
             }
 
             // Debug console output
-            Console.WriteLine("SCAN RESULT: Number of hosts scanned : " + totalScannedHosts + ". Alive hosts : " + aliveHostsNumber + ".");
+            Console.WriteLine("{0} RESULT: Number of hosts scanned : {1}. Alive hosts : {2}.", scanName, totalScannedHosts, aliveHostsNumber);
 
             return aliveHosts;
         }

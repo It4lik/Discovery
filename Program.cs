@@ -22,6 +22,7 @@ namespace discovery
             // Object that issue the discovery
             Discover disco = new Discover(Discover.CheckType.tcp, LAN, 6379, actionIfUp, actionIfDown, redis, "LAN");
             disco.startDiscovery();
+
         }
     }
 }

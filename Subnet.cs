@@ -234,7 +234,7 @@ namespace discovery
             // The specified mask must be inferior to the original mask
             if (this._maskCIDR >= newMaskCIDR) {
                 Console.WriteLine("FATAL: You can't shrink in a larger subnet or same size. Exiting.");
-                System.Environment.Exit(5);
+                System.Environment.Exit(7);
             }
 
             /// Return value

@@ -42,7 +42,7 @@ namespace discovery
                         sshclient.Connect();
                         using(var cmd = sshclient.CreateCommand(_SSHCommand)){
                             cmd.Execute();
-                            Console.WriteLine("[{0}]: Command {1} exited with {2} exit code", currentScannedHost, cmd.CommandText, cmd.ExitStatus); 
+                            Console.WriteLine("[{0}]: Command {1} exited with {2} exit code through SSH connection.", currentScannedHost, cmd.CommandText, cmd.ExitStatus); 
                             }
                             sshclient.Disconnect();
                     }

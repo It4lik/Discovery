@@ -19,7 +19,7 @@ namespace discovery
         /// Subnet on which issue checks.
         private Subnet _targetedSubnet; 
         /// This is obtained by shrinking the _targetedSubnet
-        private List<Subnet> _shrunkSubnets;  
+        public List<Subnet> _shrunkSubnets {get; set;}
         /// The mask wanted to shrink the subnet (one thread will take care of each subnet)
         private int _shrunkNetworksCIDRMask;
         /// Maximum number of threads that can for on subnet
@@ -53,20 +53,24 @@ namespace discovery
                 _shrunkNetworksCIDRMask = shrunkNetworksCIDRMask;
                 _shrunkSubnets = _targetedSubnet.Shrink(_shrunkNetworksCIDRMask);
             }
+            else if (shrunkNetworksCIDRMask == _targetedSubnet._maskCIDR) {
+                _shrunkSubnets.Add(_targetedSubnet);
+            }
+            else {
+                Console.WriteLine("FATAL: You can't shrink the initial network in bigger ones. Exiting.");
+                System.Environment.Exit(7);
+            }
 
             /* foreach (Subnet net in _shrunkSubnets) {
                 // Debug console output
                 Console.WriteLine("One shrunk network is {0}/{1}. Type : {2}.", net._networkIP, net._maskCIDR, net._type);
             } */
-
-            // Initialize every _discoveries Thread with targeted CheckType and subnets in _shrunkSubnets
-            //initializeDiscoveriesThreads();
         }
+
         /// Used to start threads that issue scans
         public void startDiscovery() {
+            // This will be used to launch every thread
             Thread discovery;
-
-            // Implementing subnet shrinking
 
             int i = 0;
             foreach(Subnet net in _shrunkSubnets) {
@@ -76,13 +80,13 @@ namespace discovery
                     default:
                         // Instanciate the thread with discoveryTcp method.
                         discovery = new Thread(delegate() {
-                            discoveryTcp(_cts.Token);
+                            discoveryTcp(_cts.Token, net, i);
                         });
                         break;
                 }
                 Console.WriteLine("DEBUG: Thread {0}{1} initialized.", _discoveryName, i); // Debug console output
                 discovery.Start();
-                Console.WriteLine("DEBUG: Thread {0}{1} started.", _discoveryName, i); // Debug console output
+                Console.WriteLine("DEBUG: Thread {0}{1} started on subnet {2}/{3}.", _discoveryName, i, net._networkIP, net._maskCIDR); // Debug console output
                 i++;
             }
 
@@ -94,50 +98,29 @@ namespace discovery
             _cts.Cancel();
             Console.WriteLine("DEBUG: Thread {0} aborted.", _discoveryName); // Debug console output
         }
-        private void initializeDiscoveriesThreads() {
-
-            // Implementing subnet shrinking : 
-            //   - this must be a foreach on _shrunkSubnets
-            //   - each iteration initialize a thread in _discoveries
-            foreach(Subnet net in _shrunkSubnets) {
-                switch (_checkType) {
-                    // _cts.Token is always sent : it is used to stop threads
-                    case CheckType.tcp:
-                    default:
-                        // Instanciate the thread with discoveryTcp method.
-                        Thread discovery = new Thread(delegate() {
-                            discoveryTcp(_cts.Token);
-                        });
-                        _discoveries.Add(discovery);
-                        Console.WriteLine("DEBUG: Thread {0} initialized.", _discoveryName); // Debug console output
-
-                        break;
-                }
-            }
-
-        }
-        
         private void discoveryCustom(string command) {
             // thread that issue shell commands
         }
 
-        private void discoveryTcp(CancellationToken cancelToken) {
-            // thread that open TCP connections
-
+        /// Method used by TCP check threads
+        private void discoveryTcp(CancellationToken cancelToken, Subnet targetedNetwork, int threadNumber) {
+            // Used to store hosts
             List<string> aliveHosts = new List<string>();
             List<string> existingHosts = new List<string>();
 
+            // Current thread prefix
+            string threadPrefix = String.Concat(_discoveryName, threadNumber);
             
             //while (true) {
             for (int i = 0; i < 1; i++) {
                 // Used to store aliveHosts detected by check
-                aliveHosts = Scan.TCPScan(_targetedSubnet.getAllIPsInSubnet(), _targetedPort);
-                existingHosts =  _redis.GetSubnetHosts(_discoveryName);
+                aliveHosts = Scan.TCPScan(targetedNetwork.getAllIPsInSubnet(), _targetedPort, threadPrefix);
+                existingHosts =  _redis.GetSubnetHosts(threadPrefix);
                 
                 if(cancelToken.IsCancellationRequested) {
                     // If stopDiscovery() was called. That means that someone wants to stop the discovery, and thus, this thread. 
                     // Cleanup and exit the while loop.  
-                    Console.WriteLine("DEBUG: Cancel method called on {0} thread. Cancellation requested.", _discoveryName); // Debug console output
+                    Console.WriteLine("DEBUG: Cancel method called on {0} thread. Cancellation requested.", threadPrefix); // Debug console output
                     return;
                 }
 
@@ -150,10 +133,10 @@ namespace discovery
                 */
                 foreach (string existingHost in existingHosts) {
                     // If the host is in redis as "UP", but not in current alive hosts list
-                    if ( (! aliveHosts.Contains(existingHost)) && (_redis.Read(_discoveryName, existingHost) == "UP") ) {
-                        Console.WriteLine("{0}: Deleting {1} which is not alive.", _discoveryName, existingHost); // Debug console output
+                    if ( (! aliveHosts.Contains(existingHost)) && (_redis.Read(threadPrefix, existingHost) == "UP") ) {
+                        Console.WriteLine("{0}: Deleting {1} which is not alive.", threadPrefix, existingHost); // Debug console output
                         // Mark the host as down in redis
-                        _redis.markHostDown(_discoveryName, existingHost);
+                        _redis.markHostDown(threadPrefix, existingHost);
                         // Execute action _actionIfDown
                         _actionIfDown.Execute(existingHost);
                     }
@@ -167,19 +150,19 @@ namespace discovery
                 */
                 foreach (string aliveHost in aliveHosts) {
                     // If the host is alive and doesn't exist in redis or marked as DOWN
-                    if ( (! _redis.doesKeyExist(_discoveryName, aliveHost)) || (_redis.Read(_discoveryName, aliveHost) == "DOWN")) {
-                        Console.WriteLine("{0}: Host {1} was not in Redis. Adding it.", _discoveryName, aliveHost); // Debug console output
+                    if ( (! _redis.doesKeyExist(threadPrefix, aliveHost)) || (_redis.Read(threadPrefix, aliveHost) == "DOWN")) {
+                        Console.WriteLine("{0}: Host {1} was not in Redis. Adding it.", threadPrefix, aliveHost); // Debug console output
                         // Mark the host as UP in redis
-                        _redis.markHostUp(_discoveryName, aliveHost);
+                        _redis.markHostUp(threadPrefix, aliveHost);
                         // Execute the _actionIfUp action
                         _actionIfUp.Execute(aliveHost);
                     }
                     else {
-                        Console.WriteLine("{0}: Host {1} was already in Redis ! Value : {2}", _discoveryName, aliveHost, _redis.Read(_discoveryName, aliveHost)); // Debug console output
+                        Console.WriteLine("{0}: Host {1} was already in Redis ! Value : {2}", threadPrefix, aliveHost, _redis.Read(threadPrefix, aliveHost)); // Debug console output
                     }
                 }
             }
-            Console.WriteLine("DEBUG: Out of loop in {0} thread. Self-destructin.", _discoveryName); // Debug console output
+            Console.WriteLine("DEBUG: Out of loop in {0} thread. Self-destructin.", threadPrefix); // Debug console output
             return;
         }
     }
