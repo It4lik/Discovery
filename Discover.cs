@@ -1,6 +1,7 @@
 using System.Threading;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace discovery
 {
@@ -11,8 +12,6 @@ namespace discovery
         
         public enum CheckType { tcp };
         /// These are every threads used to scan each Subnet in _shrunkSubnets
-        private List<Thread> _discoveries; 
-        /// CancellationTokenSource used to properly stop threads (eg checks).
         private CancellationTokenSource _cts; 
         /// Check to use on subnet's hosts.
         private CheckType _checkType;
@@ -69,28 +68,23 @@ namespace discovery
 
         /// Used to start threads that issue scans
         public void startDiscovery() {
-            // This will be used to launch every thread
-            Thread discovery;
-
-            int threadNumber = 1;
-            foreach(Subnet shrunkSubnet in _shrunkSubnets) {
-                switch (_checkType) {
-                    // _cts.Token is always sent : it is used to stop threads
-                    case CheckType.tcp:
-                    default:
-                        // Initialize the thread with discoveryTcp method.
-                        discovery = new Thread(delegate() {
-                            discoveryTcp(_cts.Token, shrunkSubnet, threadNumber);
-                        });
-                        break;
-                }
-                Console.WriteLine("DEBUG: Thread {0}{1} initialized.", _discoveryName, threadNumber); // Debug console output
-                discovery.Start();
-                Console.WriteLine("DEBUG: Thread {0}{1} started on subnet {2}/{3}.", _discoveryName, threadNumber, shrunkSubnet._networkIP, shrunkSubnet._maskCIDR); // Debug console output
-                //System.Threading.Thread.Sleep(3000);
-                threadNumber++;
+            int threadId = 0;
+            
+            //while (true) {
+            for (int i = 0; i < 1; i++) {
+                // Parralel iteration on each shrunkSubnet, using multithreading. 
+			    _shrunkSubnets.AsParallel().WithDegreeOfParallelism(_maxThreads).WithCancellation(_cts.Token).ForAll(shrunkSubnet => {
+                    // te permet de récupérer l'ID du Thread en cours, je ne l'ai pas testé donc je ne sais pas ce que ça va donner dans ton cas :D
+                    threadId++;
+                    switch (_checkType) {
+                        // _cts.Token is always sent : it is used to stop threads
+                        case CheckType.tcp:
+                        default:
+                            discoveryTcp(_cts.Token, shrunkSubnet, threadId);
+                            break;
+                    }
+                });
             }
-
         }
 
         public void stopDiscovery() {
@@ -113,11 +107,6 @@ namespace discovery
             // Current thread prefix
             string threadPrefix = String.Concat(_discoveryName, threadNumber);
             
-                Console.WriteLine("thread number : {0}", threadNumber);
-
-
-            //while (true) {
-            for (int i = 0; i < 1; i++) {
                 // Used to store aliveHosts detected by check
                 aliveHosts = Scan.TCPScan(targetedNetwork.getAllIPsInSubnet(), _targetedPort, threadPrefix);
                 existingHosts =  _redis.GetSubnetHosts(threadPrefix);
@@ -167,7 +156,7 @@ namespace discovery
                         Console.WriteLine("{0}: Host {1} was already in Redis ! Value : {2}", threadPrefix, aliveHost, _redis.Read(threadPrefix, aliveHost)); // Debug console output
                     }
                 }
-            }
+            
             Console.WriteLine("DEBUG: Out of loop in {0} thread. Self-destructin.", threadPrefix); // Debug console output
             return;
         }
