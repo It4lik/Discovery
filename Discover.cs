@@ -78,7 +78,7 @@ namespace discovery
                     // _cts.Token is always sent : it is used to stop threads
                     case CheckType.tcp:
                     default:
-                        // Instanciate the thread with discoveryTcp method.
+                        // Initialize the thread with discoveryTcp method.
                         discovery = new Thread(delegate() {
                             discoveryTcp(_cts.Token, shrunkSubnet, threadNumber);
                         });
@@ -104,8 +104,9 @@ namespace discovery
 
         /// Method used by TCP check threads
         private void discoveryTcp(CancellationToken cancelToken, Subnet targetedNetwork, int threadNumber) {
-            // Used to store hosts
+            // Used to store hosts that are currently alive : TCP connection succeeded
             List<string> aliveHosts = new List<string>();
+            // Used to store hosts that are currently marked as "UP" in Redis
             List<string> existingHosts = new List<string>();
 
             // Current thread prefix
