@@ -230,17 +230,66 @@ namespace discovery
         }
 
         /// This method is used to shred networkToShrink in multiple subnets with a maskCIDR mask. (ie This will shrink 192.168.0.0/23 in 192.168.0.0/24 and 192.168.1.0/24)
-        /*public List<Subnet> shrinkSubnetInSpecifiedSize(Subnet CIDRNetworkToShrink, int maskCIDR) {
+        public List<string> shrinkSubnet(Subnet CIDRNetworkToShrink, int newMaskCIDR) {
             // The specified mask must be inferior to the original mask
-            if ()
+            if (CIDRNetworkToShrink._maskCIDR >= newMaskCIDR) {
+                Console.WriteLine("FATAL: You can't shrink in a larger subnet or same size. Exiting.");
+                System.Environment.Exit(5);
+            }
+
+            /// Return value
+            List<string> shrunkSubnets = new List<string>();
             
-            // Return value
-            List<Subnet> shrunkSubnets = new List<Subnet>();
+            // IP address of initial network, binary formatted, without dots. Like "01011101010001100100100001000100"
+            string initialNetworkBinIP = CIDRNetworkToShrink.DecimalIPtoBinIP(_networkIP);
+
+            // The "fix part" of the subnet address : every bits in the initial mask. These will never change. 
+            string fixPart = initialNetworkBinIP.Substring(0, CIDRNetworkToShrink._maskCIDR);
+            // The "net part" are the bits who are going to be part of the new network adresses for each resulting shrunk subnet
+            string netPart = initialNetworkBinIP.Substring(CIDRNetworkToShrink._maskCIDR, (newMaskCIDR - CIDRNetworkToShrink._maskCIDR));
+            // The "ip range part" are the bits that are going to be out of the new masks
+            string ipRangePart = initialNetworkBinIP.Substring(newMaskCIDR);
             
-            // This is the "fix part" of the subnet address : every bits in the initial mask. This will never change. 
+            /*
+            // We are going to iterate on all shrinked subnets to store them in a list, more specifically, we store their CIDR formatted addresses (like "192.168.1.0/24")
+            // To iterate on these network addresses, we juste need to : 
+            //   - keep the fix part (eg keep initialNetworkBinIP bits)
+            //   - increment the net part
+            //   - set each bit of IP range part to 0 (eg keep initialNetworkBinIP bits)
+            //   - concatenate '/' and newMaskCIDR to the resulting address
+            // We also need to calculate the last network address as an exit condition for the loop : 
+            //   - keep the fix part (eg keep initialNetworkBinIP bits)
+            //   - set each bit of network part to 1
+            //   - set each but of IP range part to 0 (eg keep initialNetworkBinIP bits)
+            */   
+
+            char[] lastNetworkAddressArray = initialNetworkBinIP.ToCharArray();
+            for (int i = CIDRNetworkToShrink._maskCIDR; i < newMaskCIDR; i++)
+            {
+                lastNetworkAddressArray[i] = '1';
+            }
+            // Store the last address as a string
+            string lastNetworkAddress = new string(lastNetworkAddressArray);
+
+            // Incremented IP address all along the loop
+            string currentBinIP = initialNetworkBinIP;
+            do
+            {
+                // Add currentBinIP to the returned list but correctly formatted : "192.168.1.0/26" (new mask)
+                shrunkSubnets.Add(String.Concat((BinIPtoDecimalIP(BinIPtoBinIPWithDots(currentBinIP))), '/', newMaskCIDR));
+                // Increment netPart
+                netPart = BinaryTools.incrementBin(netPart).Substring(BinaryTools.incrementBin(netPart).Length - netPart.Length, netPart.Length); // Substring is used because increment bin always return an 8 bit string (or any other 8 multiples)
+                // Create the new currentBinIP by concatenating fixPart netPart and ipRangePart
+                currentBinIP = String.Concat(fixPart, netPart, ipRangePart);
+            } while (currentBinIP != lastNetworkAddress);
+
+            // Add the last one
+            shrunkSubnets.Add(String.Concat((BinIPtoDecimalIP(BinIPtoBinIPWithDots(lastNetworkAddress))), '/', newMaskCIDR));
 
             return shrunkSubnets;
-        }*/
+        }
+
+
         private bool verifyAddressCIDR(string CIDRAddress) {
             // Used to verify that a string is a subnet IPv4 address formatted in CIDR (as in "192.168.1.0/24)
             Regex CIDRRegex = new Regex(@"^(([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){2}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/(([1-9])|([12][0-9])|(3[0-2]))$");
