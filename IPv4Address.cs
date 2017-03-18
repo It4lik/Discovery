@@ -46,9 +46,8 @@ namespace discovery
             // takes a string array and returns the concatenations of all the array and dots (array with values 192,168,0,1 as paramater returns "192.168.0.1")
             return String.Concat(stringArray[0], ".", stringArray[1], ".", stringArray[2], ".", stringArray[3]);
         }
-
+        /// Argument must be an address binary formatted with dots as 00010001.10110110.00101011.00110101
         protected string IncrementIP(string ipToInc) {
-            // Argument must be an address binary formatted with dots as 00010001.10110110.00101011.00110101
             string[] splittedIP = ipToInc.Split('.');
             // For each byte
             for (var i = 3 ; i >= 0 ; i--) {
