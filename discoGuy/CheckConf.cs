@@ -23,7 +23,9 @@ namespace discovery
                 Environment.Exit(10); // TODO : this should be non-blocking but just exit the creation of the class
             }
             
-            /*
+            CheckConfigFileSyntax();
+
+            /*/
 
             // We are going to iterate on all checks asked by configuration file. 
             // Each comports every parameter we need to instanciate a new Discover object, and start scanning. 
@@ -56,13 +58,6 @@ namespace discovery
                 ActionJObjectToHostAction(actionIfDown);
 
                // subnetObject = new Subnet()
-
-             /*   _checks.Add(new Discover(
-                    Enum.Parse(Discover.CheckType, checkType),
-                    new Subnet(subnet),
-                    scannedPort,
-
-                    )*/
             }
 
             //Console.WriteLine(_checkName);
@@ -86,6 +81,7 @@ namespace discovery
         }
 
         private void ActionJObjectToHostAction(JObject actionToConvert) {
+            // UNFINISHED
             HostAction action;
             string SSHHost;
             try {
@@ -96,13 +92,16 @@ namespace discovery
                 SSHHost = actionToConvert["SSHHost"].ToString();
 
             }
+            catch (System.Exception) {
+
+            }
             Console.WriteLine(actionToConvert["ActionType"]);
             Console.WriteLine(actionToConvert.ToString());
 
             //return action;
         }
         /// Verify the JSON configuration file syntax
-        private bool CheckConfigFileSyntax(JObject configurationFile) {
+        private bool CheckConfigFileSyntax() {
             bool isValid = true;
 
             // These are the different parameters we need to get
@@ -116,29 +115,102 @@ namespace discovery
             JObject actionIfUp;   // Contains a JSON snippet describing an action to do when a host spawns on network
             JObject actionIfDown; //  Contains a JSON snippet describing an action to do when a host disappeared from network
 
+            // List of possible parameters
+            List<string> mandatoryParameters = new List<string>(new string[] {"name", "subnet", "port", "redisHost", "checkType", "actionIfUp", "actionIfDown"});
+            List<string> optionalParameters = new List<string>(new string[] {"maxThreads", "wantedSubnetSize"});
+
             try {
+                // For each tests (each child property of "checks")
                 foreach(KeyValuePair<string, JToken> check in (JObject)_configuration["checks"]) {
-                    foreach(string currentKey in _configuration["checks"].Values()) {
-                        Console.WriteLine(currentKey);
+                    string currentCheck = check.Key.ToString();
+                    // For each child property of current check (eg check parameters)
+                    foreach(KeyValuePair<string, JToken> currentCheckParameter in (JObject)_configuration["checks"][check.Key]) {
+
+                        // Get the value and the key of current check parameter
+                        string value = currentCheckParameter.Value.ToString();
+                        string key = currentCheckParameter.Key.ToString();
+
+                        // If the paramater is not in possible paramaters, the configuration file is not valid
+                        if ( ! (mandatoryParameters.Contains(key) && optionalParameters.Contains(key))) {
+                            Console.WriteLine($"ERROR: {key} is not a valid parameter");
+                            isValid = false;
+                            continue;
+                        }
+
+                        // Test if values are empty (blocking if it's a mandatory parameter)
+                        switch (value) {
+                            case "":
+                                if (mandatoryParameters.Contains(key)) {
+                                    Console.WriteLine($"ERROR: {key} can NOT be empty.");
+                                    isValid = false;
+                                    continue;
+                                } else if (optionalParameters.Contains(key)) {
+                                    Console.WriteLine($"WARNING: {key} is empty.");
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+
+                        // Test keys and verify their values
+                        switch (key) {
+                            // Subnet : must be CIDR formatted IPv4 network address
+                            case "subnet":
+                                if ( ! Subnet.verifyAddressCIDR(value)) {
+                                    Console.WriteLine($"ERROR: {value} is not a valid CIDR network address (like '192.168.1.0/24') in {currentCheck}.");
+                                    isValid = false;
+                                    continue;
+                                }
+                                break;
+                            // Port : must be an integer between 0 and 65535
+                            case "port":
+                                int n;
+                                if (int.TryParse(value, out n)) {
+                                    if (n > 65535 || n < 0) {
+                                        Console.WriteLine($"ERROR: {value} is not set to a valid port in {currentCheck}.");
+                                        isValid = false;
+                                        continue;
+                                    }   
+                                }
+                                else {
+                                    Console.WriteLine($"ERROR: {value} is not set to a valid port in {currentCheck}.");
+                                    isValid = false;
+                                    continue;
+                                }
+                                break;
+                            // RedisHost : must be an IPv4 formatted address and a port separated from the ':' character
+                            case "redisHost":
+                                if (value.Contains(":")) {
+                                    if (value.Split(':').Length < 2 && value.Split(':').Length > 0) {
+                                        string host = value.Split(':')[0]; string port = value.Split(':')[1];
+                                        if ( ! IPv4Address.IsIPAddress(host)) {
+                                            Console.WriteLine($"ERROR : Your Redis IP address {host} is not a valid IPv4 address (check {currentCheck}");
+                                            isValid = false;
+                                            continue;
+                                        }
+                                        if (int.TryParse(port, out n)) {
+                                            if (n > 65535 || n < 0) {
+                                                Console.WriteLine($"ERROR:  Your Redis port {port} is not a valid port (check {currentCheck}");
+                                                isValid = false;
+                                                continue;
+                                            }
+                                        }
+                                        else { 
+                                            Console.WriteLine($"ERROR:  Your Redis port {port} is not a valid port (check {currentCheck}");
+                                            isValid = false;
+                                            continue;
+                                        }
+                                    }
+                                }
+                                break;
+                            default:
+                                break;
+                        }
                     }
-                    
-                    
-                    
-                    if ((string)_configuration["checks"][check.Key]["name"].ToString() == String.Empty) {
-                        Console.WriteLine($"CheckName of {check.Key} can NOT be empty.");
-                        return false;
-                    }
-                    subnet = (string)_configuration["checks"][check.Key]["subnet"];
-                    scannedPort = (int)_configuration["checks"][check.Key]["port"];
-                    redisHost = (string)_configuration["checks"][check.Key]["redisHost"];
-                    checkType = (string)_configuration["checks"][check.Key]["checkType"];
-                    if ((string)_configuration["checks"][check.Key]["wantedSubnetSize"] != String.Empty)
-                        subSize = (int)_configuration["checks"][check.Key]["wantedSubnetSize"];
-                    if ((string)_configuration["checks"][check.Key]["maxThreads"] != String.Empty)
-                        maxThreads = (int)_configuration["checks"][check.Key]["maxThreads"];
-                    actionIfUp = (JObject)_configuration["checks"][check.Key]["actionIfUp"];
-                    actionIfDown = (JObject)_configuration["checks"][check.Key]["actionIfDown"];
                 }
+            }
+            catch (System.Exception) {
+
             }
 
             return isValid;
