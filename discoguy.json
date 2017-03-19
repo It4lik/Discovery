@@ -1,0 +1,29 @@
+{
+  "checks": {
+    "LAN": {
+      "name": "LAN",
+      "subnet": "192.168.1.0/24",
+      "port": 443,
+      "redisHost": "192.168.1.94:6379",
+      "checkType": "tcp",
+      "wantedSubnetSize": "",
+      "maxThreads": 6,
+      "actionIfUp": {
+        "ActionType": "SSHExec",
+        "SSHHost": "192.168.1.94",
+        "SSHPort": 2222,
+        "SSHUser": "john",
+        "SSHPass": "",
+        "command": "echo \"<HOST> became UP at <TIME>\"  >> ZALU"
+      },
+      "actionIfDown": {
+        "ActionType": "SSHExec",
+        "SSHHost": "192.168.1.94",
+        "SSHPort": 2222,
+        "SSHUser": "john",
+        "SSHPass": "",
+        "command": "echo \"<HOST> became DOWN at <TIME>\"  >> ZALU"
+      }
+    }
+  }
+}

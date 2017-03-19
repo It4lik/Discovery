@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 
 namespace discovery
 {
@@ -60,6 +61,11 @@ namespace discovery
             }
             // this returns a 32 bit long string  (ip, binary, without dots)
             return StringArrayToIP(splittedIP);
+        }
+        /// Used to verify that a string is an IPv4 address 
+        public static bool IsIPAddress(string IPAddress) {
+            Regex CIDRRegex = new Regex(@"^(([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){2}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$");
+            return CIDRRegex.IsMatch(IPAddress);
         }
 
     }
