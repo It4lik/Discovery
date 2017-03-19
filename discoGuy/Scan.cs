@@ -20,8 +20,7 @@ namespace discovery
             connection.ReceiveTimeout = timeout;
 
             bool isHostReachable;
-            try
-            {
+            try {
                 // Connect to remote host 
                 connection.ConnectAsync(hostIPAddress, hostTargetedPort);
                 System.Threading.Thread.Sleep(timeout);

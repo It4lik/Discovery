@@ -1,8 +1,0 @@
-C:\Users\It4\Documents\Work\Gits\Discovery\Discovery\bin\Debug\netcoreapp1.1\discovery.deps.json
-C:\Users\It4\Documents\Work\Gits\Discovery\Discovery\bin\Debug\netcoreapp1.1\discovery.runtimeconfig.json
-C:\Users\It4\Documents\Work\Gits\Discovery\Discovery\bin\Debug\netcoreapp1.1\discovery.runtimeconfig.dev.json
-C:\Users\It4\Documents\Work\Gits\Discovery\Discovery\obj\Debug\netcoreapp1.1\discovery.AssemblyInfo.cs
-C:\Users\It4\Documents\Work\Gits\Discovery\Discovery\bin\Debug\netcoreapp1.1\discovery.dll
-C:\Users\It4\Documents\Work\Gits\Discovery\Discovery\bin\Debug\netcoreapp1.1\discovery.pdb
-C:\Users\It4\Documents\Work\Gits\Discovery\Discovery\obj\Debug\netcoreapp1.1\discovery.dll
-C:\Users\It4\Documents\Work\Gits\Discovery\Discovery\obj\Debug\netcoreapp1.1\discovery.pdb
