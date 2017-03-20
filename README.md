@@ -87,5 +87,4 @@ sshserver:~$ ls
 
 
 ## TODO
-- Redis : use database object only
-- Threads : better implementation (subnet shrinking)
+See Projects.
